@@ -1,0 +1,20 @@
+{
+  "name": "AfriAce",
+  "short_name": "AfriAce",
+  "description": "Exam prep for WASSCE, NECO, JAMB and beyond — built for African students.",
+  "start_url": "/student-portal.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0B1220",
+  "theme_color": "#0B1220",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "/icons/afriace-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

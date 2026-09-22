@@ -1,0 +1,3087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1B3A34">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AfriAce">
+<meta name="application-name" content="AfriAce">
+<meta name="description" content="Exam prep for WASSCE, NECO, JAMB and more — practice questions, AI tutor and study tools for African students.">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>AfriAce — WASSCE, NECO &amp; JAMB Study Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  /* ── AfriAce theme: terracotta + deep teal + savanna gold ── */
+  --bg:        #F8F6F2;
+  --bg2:       #FFFFFF;
+  --bg3:       #F0EBE1;
+  --bg4:       #E4DCC9;
+  --nav-bg:    #17332D;
+
+  --text:      #1C1917;
+  --text2:     rgba(28,25,23,.68);
+  --text3:     rgba(28,25,23,.42);
+
+  --border:    #E4DCC9;
+  --border2:   #D8CDB4;
+
+  --primary:       #C1541C;
+  --primary-light: #E07A3F;
+  --primary-glow:  rgba(193,84,28,0.28);
+
+  --gold:      #B8862E;
+  --green:     #1E7A52;
+  --red:       #B91C1C;
+  --teal:      #17332D;
+
+  --app-height: 100dvh;
+  --app-width:  100vw;
+}
+
+/* ---------- ACCESSIBILITY / THEME VARIANTS ---------- */
+html.theme-dark {
+  --bg: #12100E; --bg2: #1B1815; --bg3: #262220; --bg4: #322D2A;
+  --text: #F2EFEA; --text2: rgba(242,239,234,.72); --text3: rgba(242,239,234,.45);
+  --border: #322D2A; --border2: #423C38;
+}
+html.high-contrast { --text: #000; --text2: #000; --border2: #000; }
+html.high-contrast.theme-dark { --text: #fff; --text2: #fff; --border2: #fff; }
+html.high-contrast body { font-weight:600; }
+html.dyslexia-font body, html.dyslexia-font input, html.dyslexia-font button { font-family:'Lexend', sans-serif !important; letter-spacing:.2px; }
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { font-size: 16px; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  position: fixed;
+  width: 100%;
+  top: 0; left: 0;
+}
+#app { display:none; height:100%; width:100%; flex-direction:column; }
+#app.ready { display:flex; }
+
+/* ---------- SPLASH ---------- */
+#splash {
+  position:fixed; inset:0; background: linear-gradient(160deg, var(--teal), #0D211D);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:999;
+  color:#fff;
+}
+#splash .logo { font-family:'Source Serif 4', serif; font-size:2.1rem; font-weight:800; letter-spacing:.5px; }
+#splash .logo span { color: var(--gold); }
+#splash .tag { font-size:.85rem; opacity:.7; }
+
+/* ---------- LOGIN ---------- */
+#screen-login {
+  position:fixed; inset:0; background:var(--bg); z-index:900; overflow-y:auto;
+  display:none; flex-direction:column; align-items:center; padding:60px 24px 40px;
+}
+#screen-login.active { display:flex; }
+#screen-login .brand { text-align:center; margin-bottom:22px; }
+#screen-login .brand .logo { font-family:'Source Serif 4', serif; font-size:1.9rem; font-weight:800; }
+#screen-login .brand .logo span { color: var(--primary); }
+#screen-login .brand .tagline { font-size:.78rem; color:var(--text2); letter-spacing:.3px; margin-top:4px; }
+#screen-login .card { width:100%; max-width:380px; display:flex; flex-direction:column; gap:12px; }
+#screen-login .tabs {
+  display:flex; border:1px solid var(--border2); border-radius:10px; overflow:hidden; margin-bottom:6px;
+}
+#screen-login .tab {
+  flex:1; padding:11px; text-align:center; font-size:.85rem; font-weight:700; cursor:pointer;
+  background:var(--bg2); color:var(--text2); border:none; font-family:inherit;
+}
+#screen-login .tab.active { background:var(--bg3); color:var(--primary); }
+#screen-login label { font-size:.78rem; font-weight:700; color:var(--text2); margin-bottom:-4px; }
+#screen-login input {
+  width:100%; padding:13px 14px; border:2px solid var(--border2); border-radius:10px; font-size:1rem;
+  font-family:inherit; background:var(--bg2); color:var(--text);
+}
+#screen-login .remember-row { display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--text2); }
+#screen-login button.primary {
+  padding:13px; border:none; border-radius:10px;
+  background:linear-gradient(135deg, var(--primary), var(--primary-light)); color:#fff;
+  font-weight:800; font-size:.95rem; cursor:pointer; font-family:inherit; margin-top:4px;
+}
+#screen-login .link-row { text-align:center; font-size:.8rem; color:var(--text2); }
+#screen-login .link-row a { color:var(--primary); font-weight:700; text-decoration:underline; cursor:pointer; }
+#screen-login .divider { display:flex; align-items:center; gap:10px; color:var(--text3); font-size:.72rem; margin:6px 0; }
+#screen-login .divider::before, #screen-login .divider::after { content:''; flex:1; height:1px; background:var(--border2); }
+#screen-login .guest-btn {
+  width:100%; padding:12px; border-radius:10px; border:1px solid var(--border2); background:var(--bg3);
+  color:var(--text2); font-weight:700; font-size:.85rem; cursor:pointer; font-family:inherit;
+}
+#screen-login .err { color:var(--red); font-size:.82rem; min-height:1em; }
+#screen-login .load-error {
+  background:rgba(185,28,28,.08); border:1px solid rgba(185,28,28,.3); color:var(--red);
+  border-radius:10px; padding:12px 14px; font-size:.82rem; display:none;
+}
+
+/* ---------- SCREENS ---------- */
+main#screens { flex:1; overflow-y:auto; padding-bottom:74px; }
+.screen { display:none; padding:18px 16px 24px; }
+.screen.active { display:block; }
+.section-title { font-family:'Source Serif 4', serif; font-size:1.3rem; font-weight:700; margin:4px 0 14px; }
+
+.home-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+.home-header .greeting { font-family:'Source Serif 4', serif; font-size:1.4rem; font-weight:700; }
+.home-header .sub { color:var(--text2); font-size:.85rem; margin-top:2px; }
+
+/* ---------- HOME BANNER ---------- */
+.home-banner {
+  background:linear-gradient(135deg, var(--teal), #0D211D); color:#fff; border-radius:16px; padding:18px;
+  margin-bottom:16px;
+}
+.hb-top { display:flex; justify-content:space-between; align-items:flex-start; }
+.hb-label { font-size:.65rem; font-weight:800; letter-spacing:.5px; opacity:.65; }
+.hb-greeting { font-family:'Source Serif 4', serif; font-size:1.3rem; font-weight:700; margin:2px 0 6px; }
+.hb-context-pill { display:inline-block; background:rgba(255,255,255,.12); border-radius:999px; padding:3px 10px; font-size:.72rem; font-weight:700; }
+.hb-exam-pill { background:rgba(193,84,28,.35); border-radius:999px; padding:5px 11px; font-size:.68rem; font-weight:800; white-space:nowrap; }
+.hb-countdown { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:16px; }
+.hb-countdown div { background:rgba(255,255,255,.08); border-radius:10px; padding:8px 4px; text-align:center; }
+.hb-countdown b { display:block; font-size:1.15rem; font-weight:800; }
+.hb-countdown span { font-size:.6rem; opacity:.65; font-weight:700; letter-spacing:.3px; }
+.hb-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
+.hb-stats div { text-align:center; padding:6px 2px; }
+.hb-stats b { display:block; font-size:1rem; font-weight:800; color:var(--gold); }
+.hb-stats span { font-size:.6rem; opacity:.7; font-weight:700; }
+
+/* ---------- QUICK ACTIONS ---------- */
+.quick-actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px; }
+.quick-actions button {
+  background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:12px 4px; font-family:inherit;
+  cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:.68rem; font-weight:700; color:var(--text2);
+}
+.quick-actions button span:last-child { font-size:.65rem; }
+
+/* ---------- GOAL CARD ---------- */
+.goal-card { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:6px; }
+.goal-header { margin-bottom:10px; }
+.goal-body { display:flex; align-items:center; gap:12px; }
+.goal-ring {
+  width:52px; height:52px; border-radius:50%; border:4px solid var(--primary); display:flex; align-items:center;
+  justify-content:center; font-size:.72rem; font-weight:800; flex-shrink:0;
+}
+
+/* ---------- EXPLORE ROW ---------- */
+.explore-scroll { display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+.explore-scroll .ex-item {
+  flex:0 0 auto; width:76px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:12px 6px;
+  text-align:center; cursor:pointer;
+}
+.explore-scroll .ex-item .ic { font-size:1.4rem; display:block; margin-bottom:4px; }
+.explore-scroll .ex-item span { font-size:.65rem; font-weight:700; color:var(--text2); }
+
+/* ---------- HOME SUBJECT GRID (2 col with mastery bar) ---------- */
+.subject-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.subject-grid .sg-card {
+  border-radius:14px; padding:14px; color:#fff; cursor:pointer; min-height:96px; display:flex; flex-direction:column; justify-content:space-between;
+}
+.subject-grid .sg-icon { font-size:1.3rem; }
+.subject-grid .sg-name { font-weight:800; font-size:.88rem; margin-top:6px; }
+.subject-grid .sg-bar { height:4px; background:rgba(255,255,255,.25); border-radius:2px; margin-top:8px; overflow:hidden; }
+.subject-grid .sg-bar-fill { height:100%; background:#fff; }
+.subject-grid .sg-pct { font-size:.68rem; opacity:.85; margin-top:4px; }
+.context-chip {
+  display:inline-flex; align-items:center; gap:6px; background:var(--bg3); border:1px solid var(--border);
+  border-radius:999px; padding:5px 12px; font-size:.75rem; font-weight:700; color:var(--text2);
+}
+
+.card-list { display:flex; flex-direction:column; gap:10px; }
+.subject-card, .tool-card {
+  background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:14px 16px;
+  display:flex; align-items:center; gap:12px; cursor:pointer;
+}
+.subject-card:active, .tool-card:active { transform: scale(0.98); }
+.subject-card .icon, .tool-card .icon {
+  width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; background: linear-gradient(145deg, var(--primary-light), var(--primary)); color:#fff; flex-shrink:0;
+}
+.subject-card .name { font-weight:700; font-size:.95rem; }
+.subject-card .meta { font-size:.78rem; color:var(--text2); margin-top:1px; }
+
+.topic-item {
+  background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:8px;
+  cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+}
+.notes-block { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; }
+.notes-block h3 { font-size:.95rem; margin-bottom:8px; }
+.notes-block ul { padding-left:18px; margin-top:6px; }
+.notes-block .badge-unverified {
+  display:inline-block; font-size:.68rem; font-weight:800; color:var(--red); background:rgba(185,28,28,.08);
+  border-radius:6px; padding:2px 8px; margin-bottom:10px;
+}
+
+.quiz-q { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:14px; }
+.quiz-q .qtext { font-size:1rem; font-weight:600; margin-bottom:14px; }
+.quiz-opt {
+  display:block; width:100%; text-align:left; padding:12px 14px; margin-bottom:8px; border-radius:10px;
+  border:2px solid var(--border2); background:var(--bg2); font-family:inherit; font-size:.9rem; cursor:pointer;
+}
+.quiz-opt.correct { border-color:var(--green); background:rgba(30,122,82,.08); }
+.quiz-opt.wrong { border-color:var(--red); background:rgba(185,28,28,.08); }
+.quiz-progress { font-size:.8rem; color:var(--text2); margin-bottom:10px; }
+
+/* ---------- BOTTOM NAV ---------- */
+.bottom-nav {
+  position:fixed; left:0; right:0; bottom:0; height:64px; background:var(--nav-bg);
+  display:flex; z-index:50; padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item {
+  flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; color:rgba(255,255,255,.55); cursor:pointer; position:relative; font-family:inherit;
+}
+.nav-item.active { color:#fff; }
+.nav-item svg { width:20px; height:20px; }
+.nav-item span { font-size:.58rem; font-weight:700; letter-spacing:.3px; }
+.nav-active-dot { width:4px; height:4px; border-radius:50%; background:var(--gold); position:absolute; top:6px; opacity:0; }
+.nav-item.active .nav-active-dot { opacity:1; }
+
+.toast {
+  position:fixed; bottom:82px; left:50%; transform:translateX(-50%); background:var(--text); color:#fff;
+  padding:10px 18px; border-radius:999px; font-size:.85rem; z-index:1000; opacity:0; transition:opacity .2s; pointer-events:none;
+}
+.toast.show { opacity:1; }
+
+/* ---------- TOP HEADER ---------- */
+.top-header {
+  display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:var(--bg2);
+  border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.top-header .th-logo { font-family:'Source Serif 4', serif; font-weight:800; font-size:1.15rem; }
+.top-header .th-logo span { color:var(--primary); }
+.top-header .th-right { display:flex; align-items:center; gap:8px; }
+.th-pill {
+  display:flex; align-items:center; gap:4px; font-size:.72rem; font-weight:800; padding:4px 9px; border-radius:999px;
+}
+.th-streak { background:rgba(184,134,46,.12); color:var(--gold); }
+.th-exam { background:var(--bg3); color:var(--text2); }
+.th-avatar {
+  width:30px; height:30px; border-radius:50%; background:var(--primary); color:#fff; font-size:.72rem; font-weight:800;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+
+/* ---------- ONBOARDING WIZARD ---------- */
+.wizard-overlay {
+  position:fixed; inset:0; background:rgba(23,51,45,.55); z-index:800; display:none; align-items:flex-end; justify-content:center;
+}
+.wizard-overlay.active { display:flex; }
+.wizard-sheet {
+  background:var(--bg2); width:100%; max-width:460px; border-radius:20px 20px 0 0; padding:26px 22px 30px;
+  max-height:88vh; overflow-y:auto;
+}
+.wizard-progress { display:flex; gap:6px; margin-bottom:18px; }
+.wizard-progress div { flex:1; height:4px; border-radius:2px; background:var(--border2); }
+.wizard-progress div.done { background:var(--primary); }
+.wizard-sheet h2 { font-family:'Source Serif 4', serif; text-align:center; font-size:1.2rem; margin-bottom:4px; }
+.wizard-sheet .sub { text-align:center; color:var(--text2); font-size:.85rem; margin-bottom:18px; }
+.wizard-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; max-height:44vh; overflow-y:auto; }
+.wizard-grid.single-col { grid-template-columns:1fr; }
+.wizard-option {
+  border:2px solid var(--border2); border-radius:12px; padding:12px; text-align:center; cursor:pointer;
+  font-weight:700; font-size:.85rem; background:var(--bg2);
+}
+.wizard-option.selected { border-color:var(--primary); background:rgba(193,84,28,.08); color:var(--primary); }
+.wizard-option .desc { font-weight:400; font-size:.72rem; color:var(--text3); margin-top:2px; }
+.wizard-actions { display:flex; gap:10px; }
+.wizard-actions button {
+  flex:1; padding:12px; border-radius:10px; border:none; font-weight:800; font-size:.9rem; cursor:pointer; font-family:inherit;
+}
+.wizard-actions .back-btn { background:var(--bg3); color:var(--text2); }
+.wizard-actions .next-btn { background:linear-gradient(135deg, var(--primary), var(--primary-light)); color:#fff; }
+.wizard-actions .next-btn:disabled { opacity:.5; }
+
+/* ---------- TERM-GROUPED SYLLABUS ---------- */
+.term-header { display:flex; align-items:center; justify-content:space-between; margin:18px 0 8px; }
+.term-header .dot-label { display:flex; align-items:center; gap:6px; font-size:.72rem; font-weight:800; letter-spacing:.4px; color:var(--text2); }
+.term-header .dot { width:8px; height:8px; border-radius:50%; background:var(--primary); }
+.term-header .count { font-size:.75rem; color:var(--text3); }
+.topic-item { display:flex; align-items:center; gap:10px; }
+.topic-num {
+  width:30px; height:30px; border-radius:8px; background:var(--bg3); color:var(--text2); font-size:.75rem; font-weight:800;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.diff-pill { font-size:.65rem; font-weight:800; padding:2px 8px; border-radius:999px; margin-left:8px; }
+.diff-easy { background:rgba(30,122,82,.12); color:var(--green); }
+.diff-medium { background:rgba(184,134,46,.15); color:var(--gold); }
+.diff-hard { background:rgba(185,28,28,.1); color:var(--red); }
+
+/* ---------- TOPIC DETAIL ---------- */
+.ask-ace-card {
+  background:linear-gradient(135deg, rgba(193,84,28,.08), rgba(23,51,45,.06)); border:1px solid var(--border);
+  border-radius:14px; padding:14px; display:flex; align-items:center; gap:12px; margin-bottom:14px;
+}
+.ask-ace-card .icon { font-size:1.6rem; }
+.ask-ace-card .txt { flex:1; }
+.ask-ace-card .txt b { font-size:.88rem; }
+.ask-ace-card .txt div { font-size:.75rem; color:var(--text2); margin-top:1px; }
+.ask-ace-card button {
+  background:var(--primary); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-weight:800;
+  font-size:.78rem; cursor:pointer; font-family:inherit; white-space:nowrap;
+}
+.key-term-pill {
+  display:inline-block; background:var(--bg3); border:1px solid var(--border2); color:var(--primary); font-weight:700;
+  font-size:.78rem; padding:5px 11px; border-radius:999px; margin:0 6px 6px 0;
+}
+
+/* ---------- PROFILE ROWS / TOGGLES ---------- */
+.profile-row {
+  display:flex; align-items:center; justify-content:space-between; background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; padding:13px 14px; margin-bottom:8px; cursor:pointer;
+}
+.profile-row .left { display:flex; align-items:center; gap:10px; font-weight:600; font-size:.88rem; }
+.profile-row .right { color:var(--text2); font-size:.85rem; display:flex; align-items:center; gap:6px; }
+.toggle-switch { width:42px; height:24px; border-radius:12px; background:var(--border2); position:relative; cursor:pointer; flex-shrink:0; }
+.toggle-switch.on { background:var(--green); }
+.toggle-switch .knob { width:18px; height:18px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; transition:left .15s; }
+.toggle-switch.on .knob { left:21px; }
+.profile-stats-row { display:flex; gap:10px; margin:14px 0; }
+.profile-stats-row div { flex:1; text-align:center; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:10px 4px; }
+.profile-stats-row .num { font-weight:800; font-size:1.1rem; color:var(--primary); }
+.profile-stats-row .lbl { font-size:.65rem; color:var(--text3); font-weight:700; }
+
+/* ---------- TOOLS GRID ---------- */
+.tools-category { font-size:.72rem; font-weight:800; letter-spacing:.4px; color:var(--text3); margin:20px 0 8px; }
+.tools-category:first-child { margin-top:4px; }
+.tool-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.tool-card {
+  position:relative; background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:13px;
+  cursor:pointer; display:block;
+}
+.tool-card .badge {
+  position:absolute; top:9px; right:9px; font-size:.58rem; font-weight:800; padding:2px 7px; border-radius:999px; color:#fff;
+}
+.badge-ai { background:#6D5BD0; }
+.badge-new { background:var(--primary); }
+.badge-premium { background:var(--gold); }
+.badge-live { background:var(--red); }
+.badge-plan { background:var(--teal); }
+.badge-arcade { background:#B8449E; }
+.badge-streak { background:#D6741C; }
+.tool-card .t-icon { font-size:1.4rem; margin-bottom:6px; display:block; }
+.tool-card .t-name { font-weight:700; font-size:.85rem; margin-bottom:2px; }
+.tool-card .t-desc { font-size:.72rem; color:var(--text2); line-height:1.35; }
+
+/* ---------- LIBRARY ---------- */
+.library-search { display:flex; gap:8px; margin-bottom:12px; }
+.library-search input {
+  flex:1; padding:11px 14px; border-radius:10px; border:1px solid var(--border2); font-family:inherit; font-size:.9rem; background:var(--bg2);
+}
+.filter-chip { display:inline-flex; align-items:center; gap:4px; background:var(--bg3); border:1px solid var(--border2); border-radius:999px; padding:5px 13px; font-size:.78rem; font-weight:700; color:var(--gold); margin-bottom:14px; }
+.empty-state { text-align:center; padding:60px 20px; color:var(--text3); }
+.empty-state .icon { font-size:2.2rem; margin-bottom:10px; }
+.empty-state .title { font-weight:800; color:var(--text2); font-size:.95rem; margin-bottom:4px; }
+.empty-state .sub { font-size:.8rem; }
+
+/* ---------- COMMUNITY ---------- */
+.community-tabs { display:flex; border-bottom:2px solid var(--border); margin-bottom:14px; }
+.community-tabs button {
+  flex:1; background:none; border:none; padding:10px 4px; font-size:.82rem; font-weight:700; color:var(--text3);
+  cursor:pointer; font-family:inherit; border-bottom:2px solid transparent; margin-bottom:-2px;
+}
+.community-tabs button.active { color:var(--primary); border-bottom-color:var(--primary); }
+.community-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; font-size:.8rem; color:var(--text2); }
+.community-meta button { background:var(--green); color:#fff; border:none; border-radius:999px; padding:7px 16px; font-weight:700; font-size:.8rem; cursor:pointer; font-family:inherit; }
+
+/* ---------- TOOL DETAIL SHELL ---------- */
+.back-btn-pill {
+  background:var(--bg3); border:1px solid var(--border2); border-radius:999px; padding:6px 14px; font-size:.8rem;
+  font-weight:700; cursor:pointer; font-family:inherit; color:var(--text2); margin-bottom:14px;
+}
+.tool-detail-header { margin-bottom:14px; }
+.tool-detail-header h2 { font-family:'Source Serif 4', serif; font-size:1.25rem; }
+.tool-detail-header .sub { color:var(--text2); font-size:.82rem; margin-top:2px; }
+.tool-intro-card { background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-size:.82rem; color:var(--text2); margin-bottom:14px; line-height:1.5; }
+
+/* ---------- AI CHAT ---------- */
+.chat-thread { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; min-height:120px; }
+.chat-bubble { max-width:85%; padding:11px 14px; border-radius:14px; font-size:.87rem; line-height:1.5; }
+.chat-bubble.ai { background:var(--bg2); border:1px solid var(--border); align-self:flex-start; border-bottom-left-radius:4px; }
+.chat-bubble.user { background:var(--primary); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+.chat-input-row { display:flex; gap:8px; position:sticky; bottom:0; background:var(--bg); padding-top:6px; }
+.chat-input-row input {
+  flex:1; padding:12px 14px; border-radius:12px; border:2px solid var(--border2); font-family:inherit; font-size:.88rem; background:var(--bg2);
+}
+.chat-input-row button {
+  background:var(--primary); color:#fff; border:none; border-radius:12px; width:46px; font-size:1.1rem; cursor:pointer;
+}
+.chat-quick-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+.chat-quick-chips button {
+  background:var(--bg3); border:1px solid var(--border2); border-radius:999px; padding:5px 12px; font-size:.75rem;
+  font-weight:700; color:var(--text2); cursor:pointer; font-family:inherit;
+}
+
+/* ---------- FORM FIELDS (mark calc, tracker, etc) ---------- */
+.field-block { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px; }
+.field-block label { display:block; font-size:.78rem; font-weight:700; color:var(--text2); margin-bottom:6px; }
+.field-block input, .field-block select, .field-block textarea {
+  width:100%; padding:11px 12px; border:2px solid var(--border2); border-radius:10px; font-family:inherit; font-size:.9rem; background:var(--bg2); color:var(--text);
+}
+.target-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px; }
+.target-grid button {
+  padding:10px 4px; border-radius:10px; border:2px solid var(--border2); background:var(--bg2); font-family:inherit;
+  font-weight:700; font-size:.8rem; cursor:pointer;
+}
+.target-grid button.selected { border-color:var(--primary); background:rgba(193,84,28,.08); color:var(--primary); }
+.result-banner { background:linear-gradient(135deg, var(--teal), #0D211D); color:#fff; border-radius:14px; padding:16px; text-align:center; margin-top:12px; }
+.result-banner .big { font-size:1.6rem; font-weight:800; }
+
+/* ---------- QUESTION BANK ---------- */
+.qb-filters { display:flex; gap:6px; overflow-x:auto; margin-bottom:12px; padding-bottom:2px; }
+.qb-filters button {
+  flex:0 0 auto; background:var(--bg3); border:1px solid var(--border2); border-radius:999px; padding:6px 14px;
+  font-size:.78rem; font-weight:700; color:var(--text2); cursor:pointer; font-family:inherit;
+}
+.qb-filters button.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+.qb-item { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:13px; margin-bottom:8px; }
+.qb-item .qb-tags { font-size:.72rem; color:var(--text3); font-weight:700; margin-bottom:5px; }
+.qb-item .qb-text { font-size:.87rem; margin-bottom:8px; }
+.qb-item button { background:var(--primary); color:#fff; border:none; border-radius:8px; padding:6px 14px; font-size:.78rem; font-weight:700; cursor:pointer; font-family:inherit; }
+
+/* ---------- WRITE & SCAN ---------- */
+.upload-drop {
+  border:2px dashed var(--border2); border-radius:14px; padding:32px 16px; text-align:center; cursor:pointer;
+  background:var(--bg2); margin-bottom:12px;
+}
+.upload-drop .icon { font-size:2rem; margin-bottom:8px; }
+.upload-preview { max-width:100%; border-radius:12px; margin-bottom:12px; display:block; }
+
+/* ---------- SIMULATIONS ---------- */
+.sim-filters { display:flex; gap:6px; overflow-x:auto; margin-bottom:12px; padding-bottom:2px; }
+.sim-filters button { flex:0 0 auto; background:var(--bg3); border:1px solid var(--border2); border-radius:999px; padding:6px 14px; font-size:.78rem; font-weight:700; color:var(--text2); cursor:pointer; font-family:inherit; }
+.sim-filters button.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+.sim-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.sim-card { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:13px; cursor:pointer; }
+.sim-card .icon { font-size:1.4rem; }
+.sim-card .name { font-weight:700; font-size:.85rem; margin:6px 0 3px; }
+.sim-card .desc { font-size:.72rem; color:var(--text2); line-height:1.3; margin-bottom:8px; }
+.sim-badge { display:inline-block; font-size:.62rem; font-weight:800; padding:2px 8px; border-radius:999px; }
+.sim-badge.ready { background:rgba(30,122,82,.12); color:var(--green); }
+.sim-badge.soon { background:var(--bg3); color:var(--text3); }
+.sim-canvas-wrap { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; }
+.sim-slider-row { display:flex; align-items:center; gap:10px; margin-top:10px; font-size:.82rem; }
+.sim-slider-row input[type=range] { flex:1; }
+.sim-slider-row b { min-width:52px; text-align:right; color:var(--primary); }
+
+/* ---------- OFFLINE DOWNLOADS ---------- */
+.offline-row { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:8px; }
+.offline-row .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.offline-row .name { font-weight:700; font-size:.88rem; }
+.offline-row .meta { font-size:.72rem; color:var(--text3); }
+.offline-row button { width:100%; padding:8px; border-radius:8px; border:none; font-weight:700; font-size:.8rem; cursor:pointer; font-family:inherit; }
+.offline-row button.save { background:var(--primary); color:#fff; }
+.offline-row button.saved { background:var(--bg3); color:var(--green); }
+
+/* ---------- FLASHCARDS ---------- */
+.flip-card { perspective:1000px; height:200px; margin-bottom:16px; cursor:pointer; }
+.flip-card-inner { position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d; }
+.flip-card.flipped .flip-card-inner { transform:rotateY(180deg); }
+.flip-card-face {
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:14px; background:var(--bg2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; padding:20px; text-align:center; font-size:1rem; font-weight:600;
+}
+.flip-card-face.back { transform:rotateY(180deg); background:var(--bg3); font-weight:400; font-size:.9rem; }
+.flash-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.flash-actions button { padding:12px; border-radius:10px; border:none; font-weight:800; font-size:.85rem; cursor:pointer; font-family:inherit; }
+.flash-actions .again { background:rgba(185,28,28,.1); color:var(--red); }
+.flash-actions .gotit { background:rgba(30,122,82,.1); color:var(--green); }
+
+/* ---------- ARCADE GAMES ---------- */
+.arcade-hero { text-align:center; padding:20px; }
+.arcade-hero .big-timer { font-size:2.2rem; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--primary); }
+.scramble-letters { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin:16px 0; }
+.scramble-letters span { width:38px; height:38px; background:var(--bg3); border:2px solid var(--border2); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; }
+.memory-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.memory-card {
+  aspect-ratio:1; background:var(--bg3); border:1px solid var(--border2); border-radius:10px; display:flex; align-items:center;
+  justify-content:center; font-size:.68rem; font-weight:700; text-align:center; padding:4px; cursor:pointer;
+}
+.memory-card.revealed { background:var(--primary); color:#fff; }
+.memory-card.matched { background:rgba(30,122,82,.15); color:var(--green); border-color:var(--green); }
+
+/* ---------- AUDIO PLAYER ---------- */
+.audio-player { background:linear-gradient(135deg, rgba(193,84,28,.08), rgba(23,51,45,.06)); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:14px; text-align:center; }
+.audio-player .title { font-weight:800; margin-bottom:4px; }
+.audio-controls { display:flex; align-items:center; justify-content:center; gap:16px; margin-top:10px; }
+.audio-controls button { background:var(--primary); color:#fff; border:none; width:44px; height:44px; border-radius:50%; font-size:1.1rem; cursor:pointer; }
+.speed-row { display:flex; gap:6px; justify-content:center; margin-top:12px; }
+.speed-row button { background:var(--bg3); border:1px solid var(--border2); border-radius:999px; padding:4px 12px; font-size:.75rem; font-weight:700; cursor:pointer; font-family:inherit; }
+.speed-row button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="logo">Afri<span>Ace</span></div>
+  <div class="tag">Loading your study space…</div>
+</div>
+
+<div id="screen-login" class="active">
+  <div class="brand">
+    <div class="logo">Afri<span>Ace</span></div>
+    <div class="tagline">WASSCE &bull; NECO &bull; JAMB EXAM PREP</div>
+  </div>
+  <div class="card">
+    <div class="load-error" id="login-load-error">
+      Couldn't load the app's core library. Check your internet connection (or try disabling an ad-blocker) and reload the page.
+    </div>
+    <div class="tabs">
+      <button class="tab active" id="tab-student" onclick="setLoginTab('student')">🎓 Student Login</button>
+      <button class="tab" id="tab-staff" onclick="setLoginTab('staff')">🏫 Staff Login</button>
+    </div>
+    <label>Email or Student Number</label>
+    <input id="login-email" type="text" placeholder="you@example.com" autocomplete="username">
+    <label>Password</label>
+    <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+    <div class="remember-row">
+      <input type="checkbox" id="login-remember"> <label for="login-remember" style="margin:0;font-weight:400">Remember me on this device</label>
+    </div>
+    <button class="primary" onclick="handleSignIn()">Sign In →</button>
+    <div class="err" id="login-err"></div>
+    <div class="link-row">Forgot password? <a onclick="handleForgotPassword()">Reset it</a></div>
+    <div class="divider">OR</div>
+    <button class="guest-btn" onclick="handleGuestTour()">👀 Take a Tour — No Account Needed</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top-header">
+    <div class="th-logo">Afri<span>Ace</span></div>
+    <div class="th-right">
+      <div class="th-pill th-streak" id="th-streak">🔥 0</div>
+      <div class="th-pill th-exam" id="th-exam">—</div>
+      <div class="th-avatar" id="th-avatar">–</div>
+    </div>
+  </div>
+  <main id="screens">
+
+    <!-- ====== HOME ====== -->
+    <section class="screen active" id="screen-home">
+      <div class="home-banner" id="home-banner">
+        <div class="hb-top">
+          <div>
+            <div class="hb-label">WELCOME BACK,</div>
+            <div class="hb-greeting" id="home-greeting">Welcome 👋</div>
+            <div class="hb-context-pill" id="home-context">Loading your academic profile…</div>
+          </div>
+          <div class="hb-exam-pill" id="home-exam-pill" style="display:none">🎟 — days to exam</div>
+        </div>
+        <div class="hb-countdown" id="home-countdown" style="display:none">
+          <div><b id="cd-days">0</b><span>DAYS</span></div>
+          <div><b id="cd-hours">0</b><span>HOURS</span></div>
+          <div><b id="cd-mins">0</b><span>MINS</span></div>
+          <div><b id="cd-secs">0</b><span>SECS</span></div>
+        </div>
+        <div class="hb-stats">
+          <div><b id="stat-questions">0</b><span>Questions Done</span></div>
+          <div><b id="stat-avgscore">—</b><span>Avg Score</span></div>
+          <div><b id="stat-streak">0</b><span>Day Streak</span></div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button onclick="openTool('class_stream')">📡<span>Class Stream</span></button>
+        <button onclick="showToast('Messages — coming in a follow-up pass')">✉️<span>Messages</span></button>
+        <button onclick="openTool('write_scan')">✍️<span>Write &amp; Scan</span></button>
+        <button onclick="showToast('Portfolio — coming in a follow-up pass')">🗂️<span>Portfolio</span></button>
+        <button onclick="openCheckin()">❤️<span>Check-in</span></button>
+        <button onclick="handleJoinClass()">🔑<span>Join Class</span></button>
+      </div>
+
+      <div class="goal-card">
+        <div class="goal-header">
+          <span class="section-title" style="margin:0">TODAY'S GOAL</span>
+        </div>
+        <div class="goal-body">
+          <div class="goal-ring" id="goal-ring">0/20</div>
+          <div style="flex:1">
+            <b>Complete <span id="goal-target">20</span> MCQs</b>
+            <div style="color:var(--text2);font-size:.8rem;margin-top:2px" id="goal-remaining">Loading…</div>
+          </div>
+          <button class="primary" style="padding:9px 16px;font-size:.82rem" onclick="practiceForGoal()">Practice →</button>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:20px">🔥 Explore — extra tools</div>
+      <div class="explore-scroll" id="home-explore"></div>
+
+      <div class="section-title" style="margin-top:20px;display:flex;justify-content:space-between">
+        <span>Your subjects</span><a href="javascript:void(0)" onclick="navTo(document.querySelectorAll('.nav-item')[1],'subjects')" style="color:var(--primary);font-size:.8rem;font-weight:700">See all →</a>
+      </div>
+      <div class="subject-grid" id="home-subjects-list">
+        <p style="color:var(--text3);font-size:.85rem;">Loading subjects…</p>
+      </div>
+
+      <div class="section-title" style="margin-top:20px">Recent activity</div>
+      <div class="card-list" id="home-recent-activity"></div>
+    </section>
+
+    <!-- ====== SUBJECTS ====== -->
+    <section class="screen" id="screen-subjects">
+      <div class="section-title">Subjects</div>
+      <div id="subjects-exam-chips"></div>
+      <div class="card-list" id="subjects-list"></div>
+    </section>
+
+    <!-- ====== SYLLABUS (topics + notes for one subject) ====== -->
+    <section class="screen" id="screen-syllabus">
+      <button onclick="navTo(document.querySelectorAll('.nav-item')[1],'subjects')" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;margin-bottom:12px;cursor:pointer;color:var(--text3)">←</button>
+      <div class="section-title" id="syllabus-subject-title">Subject</div>
+      <div id="syllabus-topics-list"></div>
+      <div id="syllabus-notes-area" style="display:none">
+        <button onclick="renderTopicsList()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 12px;margin-bottom:12px;cursor:pointer;font-size:.8rem;font-weight:700">← All topics</button>
+        <div id="syllabus-notes-content"></div>
+      </div>
+    </section>
+
+    <!-- ====== QUIZ ====== -->
+    <section class="screen" id="screen-quiz">
+      <div class="section-title" id="quiz-subject-tag">Practice</div>
+      <div id="quiz-body"></div>
+    </section>
+
+    <!-- ====== TOOLS ====== -->
+    <section class="screen" id="screen-tools">
+      <div class="section-title">Study Tools 🛠️</div>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:4px">Everything you need to ace your exams</p>
+      <div id="tools-grid-container"></div>
+    </section>
+
+    <!-- ====== TOOL DETAIL (chat + dedicated tool screens) ====== -->
+    <section class="screen" id="screen-tool-detail">
+      <button class="back-btn-pill" onclick="navTo(document.querySelectorAll('.nav-item')[3],'tools')">‹ Back to Tools</button>
+      <div id="tool-detail-body"></div>
+    </section>
+
+    <!-- ====== LIBRARY ====== -->
+    <section class="screen" id="screen-library">
+      <div class="section-title">Study Library</div>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">Resources, notes and study materials from your teacher</p>
+      <div class="library-search"><input type="text" placeholder="🔍 Search resources..." oninput="filterLibrary(this.value)"></div>
+      <div class="filter-chip">✨ All</div>
+      <div id="library-list"></div>
+    </section>
+
+    <!-- ====== COMMUNITY ====== -->
+    <section class="screen" id="screen-community">
+      <div class="section-title">Community</div>
+      <div class="community-tabs">
+        <button class="active" onclick="setCommunityTab('forum', this)">💬 Forum</button>
+        <button onclick="setCommunityTab('rankings', this)">🏆 Rankings</button>
+        <button onclick="setCommunityTab('groups', this)">👥 Groups</button>
+        <button onclick="setCommunityTab('feedback', this)">💭 Feedback</button>
+      </div>
+      <div id="community-body"></div>
+    </section>
+
+    <!-- ====== PROGRESS ====== -->
+    <section class="screen" id="screen-progress">
+      <div class="section-title">Progress</div>
+      <div class="profile-stats-row">
+        <div><div class="num" id="progress-xp">0</div><div class="lbl">XP</div></div>
+        <div><div class="num" id="progress-streak">0</div><div class="lbl">Day Streak</div></div>
+      </div>
+      <div class="section-title" style="margin-top:18px">Leaderboard — your school</div>
+      <div class="card-list" id="progress-leaderboard">
+        <p style="color:var(--text3);font-size:.85rem;">Loading…</p>
+      </div>
+      <div class="section-title" style="margin-top:18px">Where to focus next</div>
+      <div id="progress-weak"><p style="color:var(--text3);font-size:.85rem;">Loading…</p></div>
+    </section>
+
+    <!-- ====== PROFILE ====== -->
+    <section class="screen" id="screen-profile">
+      <div class="section-title">Profile</div>
+      <div class="card-list" id="profile-info"></div>
+      <button class="primary" style="margin-top:16px;width:100%;background:var(--red)" onclick="handleSignOut()">Sign out</button>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="navTo(this,'home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      <span>Home</span><div class="nav-active-dot"></div>
+    </button>
+    <button class="nav-item" onclick="navTo(this,'subjects')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      <span>Subjects</span><div class="nav-active-dot"></div>
+    </button>
+    <button class="nav-item" onclick="navTo(this,'quiz')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Quiz</span><div class="nav-active-dot"></div>
+    </button>
+    <button class="nav-item" onclick="navTo(this,'tools')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span>Tools</span><div class="nav-active-dot"></div>
+    </button>
+    <button class="nav-item" onclick="navTo(this,'library')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      <span>Library</span><div class="nav-active-dot"></div>
+    </button>
+    <button class="nav-item" onclick="navTo(this,'community')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Community</span><div class="nav-active-dot"></div>
+    </button>
+    <button class="nav-item" onclick="navTo(this,'progress')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Progress</span><div class="nav-active-dot"></div>
+    </button>
+    <button class="nav-item" onclick="navTo(this,'profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span><div class="nav-active-dot"></div>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ====== ONBOARDING WIZARD (Grade -> Subjects -> Daily Goal) ====== -->
+<div class="wizard-overlay" id="wizard-overlay">
+  <div class="wizard-sheet">
+    <div class="wizard-progress">
+      <div id="wiz-dot-1"></div><div id="wiz-dot-2"></div><div id="wiz-dot-3"></div>
+    </div>
+    <div id="wizard-step-content"></div>
+  </div>
+</div>
+
+<script src="afriace-client.js"></script>
+<script src="afriace-learning.js"></script>
+<script src="afriace-quiz-ui.js"></script>
+<script>
+// =============================================================
+// AfriAce student portal — shell + core academic loop
+// =============================================================
+const STATE = {
+  currentScreen: 'home',
+  profile: null,
+  academicProfile: null,
+  schoolConfig: null,
+  subjects: [],
+  currentSubject: null,
+  currentTopics: [],
+  quizQuestions: [],
+  quizIndex: 0,
+  quizCorrect: 0,
+  streak: null,
+  xp: null,
+  wizard: { step: 1, levels: [], levelId: null, subjectIds: [], dailyGoal: 20 },
+};
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+  STATE.currentScreen = id;
+}
+
+function navTo(btn, id) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  showScreen(id);
+  if (id !== 'quiz') { STATE.quizQuestions = []; if (window.qzStopTimer) qzStopTimer(); }
+  if (id === 'subjects') renderSubjectsList();
+  if (id === 'profile') renderProfile();
+  if (id === 'progress') renderProgress();
+  if (id === 'tools') renderToolsGrid();
+  if (id === 'library') renderLibrary();
+  if (id === 'community') setCommunityTab('forum');
+  if (id === 'quiz' && !STATE.quizQuestions.length) renderQuizLanding();
+}
+
+// renderQuizLanding, startQuiz and the quiz flow now live in afriace-quiz-ui.js
+
+// ---------- TOOLS ----------
+// Structural/navigational completeness for all of MatricAce's tool
+// cards, generalized (SA-specific ones like IEB Past Papers dropped;
+// SBA -> "Continuous Assessment" to match the schema's WAEC-generic
+// naming). AI-tagged tools route to a real (if basic) AI modal wired
+// to the anthropic-proxy edge function; "coming soon" ones are marked
+// honestly rather than faked.
+const TOOLS_CATALOG = [
+  { category: 'AI Tools', items: [
+    { key:'ai_buddy', icon:'🤖', name:'Ace — AI Study Buddy', desc:'Ask any question, get step-by-step explanations — available 24/7.', badge:'AI', kind:'ai' },
+    { key:'tutor_mode', icon:'🧠', name:'Tutor Mode', desc:'AI guides you to the answer — doesn\'t just give it.', badge:'AI', kind:'ai' },
+    { key:'essay_grader', icon:'✍️', name:'Essay Grader', desc:'AI marks your essay at your grade level.', badge:'AI', kind:'ai' },
+    { key:'answer_checker', icon:'✅', name:'Answer Checker', desc:'AI checks your working and marks it like an examiner.', badge:'AI', kind:'ai' },
+    { key:'question_gen', icon:'📄', name:'Question Generator', desc:'Upload your notes — AI builds a practice paper.', badge:'AI', kind:'ai' },
+    { key:'weak_topic_radar', icon:'🎯', name:'Weak Topic Radar', desc:'AI pinpoints your weakest topics from quiz history.', badge:'AI', kind:'ai' },
+    { key:'smart_solver', icon:'🧮', name:'Smart Solver', desc:'Step-by-step working for any Maths or Science problem.', badge:'NEW', kind:'ai' },
+    { key:'simulations', icon:'🎯', name:'Simulations', desc:'Interactive Physics, Chemistry, Biology sims — adjust variables and see what happens.', badge:'NEW', kind:'tool', screen:'simulations' },
+  ]},
+  { category: 'Exam Prep', items: [
+    { key:'mock_exam', icon:'📋', name:'Mock Exam', desc:'Full timed exam simulation with results analysis.', kind:'quiz' },
+    { key:'topic_bank', icon:'🔍', name:'Topic Question Bank', desc:'Search practice questions across your subjects.', badge:'NEW', kind:'tool', screen:'question_bank' },
+    { key:'past_papers', icon:'📄', name:'Past Papers', desc:'WASSCE / NECO / JAMB papers as they get uploaded.', badge:'PREMIUM', kind:'soon' },
+    { key:'flashcards', icon:'🗂️', name:'Flashcards', desc:'Spaced repetition cards for all subjects.', badge:'PREMIUM', kind:'tool', screen:'flashcards' },
+    { key:'formula_sheet', icon:'📐', name:'Formula Sheet', desc:'Key formulas for all subjects.', kind:'tool', screen:'formula_sheet' },
+  ]},
+  { category: 'Track & Plan', items: [
+    { key:'ca_tracker', icon:'📊', name:'Continuous Assessment Tracker', desc:'Track tests, tasks & orals. See your CA average.', badge:'NEW', kind:'tool', screen:'ca_tracker' },
+    { key:'mark_calc', icon:'🧮', name:'Mark Calculator', desc:'What do you need to pass, merit or distinction?', kind:'tool', screen:'mark_calc' },
+    { key:'exam_timetable', icon:'📅', name:'Exam Timetable', desc:'Your school\'s exam schedule.', badge:'NEW', kind:'tool', screen:'exam_timetable' },
+    { key:'study_planner', icon:'🗓️', name:'Study Planner', desc:'Tasks, goals & exam countdown.', badge:'PLAN', kind:'tool', screen:'study_planner' },
+    { key:'timetable_builder', icon:'📆', name:'Timetable Builder', desc:'AI-personalised day-by-day study plan.', kind:'ai' },
+    { key:'my_notes', icon:'📝', name:'My Notes', desc:'Write & save notes per subject.', kind:'tool', screen:'my_notes' },
+  ]},
+  { category: 'Daily Habits', items: [
+    { key:'daily_challenge', icon:'⚡', name:'Daily Challenge', desc:'5 questions daily. Build your streak and earn XP.', badge:'STREAK', kind:'quiz' },
+    { key:'word_unscramble', icon:'🔤', name:'Word Unscramble', desc:'Unscramble key terms against the clock.', kind:'tool', screen:'word_unscramble' },
+    { key:'trivia_sprint', icon:'🧠', name:'Trivia Sprint', desc:'Rapid-fire questions, 2XP each.', kind:'tool', screen:'trivia_sprint' },
+    { key:'speed_math', icon:'🔢', name:'Speed Math', desc:'As many as you can solve in 60 seconds.', kind:'tool', screen:'speed_math' },
+    { key:'memory_match', icon:'🧩', name:'Memory Match', desc:'Match key term pairs.', kind:'tool', screen:'memory_match' },
+    { key:'class_duel', icon:'⚔️', name:'Class Duel', desc:'Challenge a classmate — compare scores.', kind:'tool', screen:'class_duel' },
+    { key:'pomodoro', icon:'⏱️', name:'Pomodoro Timer', desc:'Study 25min, break 5min.', kind:'tool', screen:'pomodoro' },
+    { key:'wellness', icon:'🧘', name:'Wellness Hub', desc:'Stress & burnout prevention.', kind:'tool', screen:'wellness' },
+    { key:'study_reminders', icon:'🔔', name:'Study Reminders', desc:'Choose exactly what nudges you get.', badge:'NEW', kind:'tool', screen:'study_reminders' },
+    { key:'study_groups', icon:'👥', name:'Study Groups', desc:'Group leaderboard & accountability.', badge:'NEW', kind:'tool', screen:'study_groups' },
+  ]},
+  { category: 'Live & Class', items: [
+    { key:'live_video', icon:'🎥', name:'Live Video Class', desc:'Join your teacher\'s live lesson.', badge:'LIVE', kind:'tool', screen:'live_video' },
+    { key:'live_quiz', icon:'⚡', name:'Live Class Quiz', desc:'Join your teacher\'s real-time quiz session.', badge:'LIVE', kind:'tool', screen:'live_quiz' },
+    { key:'class_stream', icon:'📡', name:'Class Stream', desc:'Updates, tasks & resources from your teacher.', kind:'tool', screen:'class_stream' },
+  ]},
+  { category: 'Future & Fun', items: [
+    { key:'career', icon:'🎓', name:'Career Pathways', desc:'WASSCE aggregate calculator & study fields.', badge:'NEW', kind:'tool', screen:'career' },
+    { key:'applications', icon:'📋', name:'Application Tracker', desc:'Tertiary deadlines, documents & status.', badge:'NEW', kind:'tool', screen:'applications' },
+    { key:'share_parent', icon:'👨‍👩‍👧', name:'Share with Parent', desc:'Send your progress report via WhatsApp or email.', badge:'NEW', kind:'tool', screen:'share_parent' },
+    { key:'audio', icon:'🎧', name:'Audio Summaries', desc:'Listen to your topic notes read aloud.', badge:'NEW', kind:'tool', screen:'audio' },
+    { key:'arcade', icon:'🕹️', name:'AfriAce Arcade', desc:'All the daily-habit games in one place.', badge:'ARCADE', kind:'tool', screen:'arcade' },
+    { key:'write_scan', icon:'📸', name:'Write & Scan', desc:'Snap your handwritten answer — AI marks it.', badge:'NEW', kind:'tool', screen:'write_scan' },
+    { key:'offline', icon:'📥', name:'Offline Mode', desc:'Download question banks — study without data.', badge:'NEW', kind:'tool', screen:'offline' },
+  ]},
+];
+
+function renderToolsGrid() {
+  const el = document.getElementById('tools-grid-container');
+  el.innerHTML = TOOLS_CATALOG.map(cat => `
+    <div class="tools-category">${cat.category.toUpperCase()}</div>
+    <div class="tool-grid">
+      ${cat.items.map(t => `
+        <div class="tool-card" onclick="openTool('${t.key}')">
+          ${t.badge ? `<div class="badge badge-${t.badge.toLowerCase()}">${t.badge}</div>` : ''}
+          <span class="t-icon">${t.icon}</span>
+          <div class="t-name">${escapeHtml(t.name)}</div>
+          <div class="t-desc">${escapeHtml(t.desc)}</div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function openTool(key) {
+  const tool = TOOLS_CATALOG.flatMap(c => c.items).find(t => t.key === key);
+  if (!tool) return;
+  if (tool.kind === 'quiz') {
+    if (!STATE.subjects.length) { showToast('Pick your subjects first — go to Profile → Selected subjects.'); return; }
+    startQuiz(STATE.subjects[0].id);
+  } else if (tool.kind === 'nav' && tool.screen === 'profile') {
+    navTo(document.querySelectorAll('.nav-item')[7], 'profile');
+  } else if (tool.kind === 'ai') {
+    openAiChat(tool);
+  } else if (tool.kind === 'tool') {
+    openToolDetail(tool);
+  } else {
+    showToast(`${tool.name} isn't built yet — flagged for a follow-up pass.`);
+  }
+}
+
+function openToolDetail(tool) {
+  showScreen('tool-detail');
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[3].classList.add('active'); // Tools tab stays highlighted
+  const renderers = {
+    mark_calc: renderMarkCalculator,
+    question_bank: renderQuestionBank,
+    ca_tracker: renderCaTracker,
+    exam_timetable: renderExamTimetable,
+    my_notes: renderMyNotes,
+    pomodoro: renderPomodoro,
+    wellness: renderWellness,
+    study_reminders: renderStudyReminders,
+    career: renderCareer,
+    applications: renderApplications,
+    share_parent: renderShareParent,
+    class_stream: renderClassStream,
+    live_video: renderLiveVideo,
+    study_groups: renderStudyGroups,
+    write_scan: renderWriteScan,
+    offline: renderOffline,
+    simulations: renderSimulations,
+    flashcards: renderFlashcards,
+    formula_sheet: renderFormulaSheet,
+    study_planner: renderStudyPlanner,
+    word_unscramble: renderWordUnscramble,
+    trivia_sprint: renderTriviaSprint,
+    speed_math: renderSpeedMath,
+    memory_match: renderMemoryMatch,
+    class_duel: renderClassDuel,
+    live_quiz: renderLiveQuiz,
+    audio: renderAudioSummaries,
+    arcade: renderArcade,
+  };
+  (renderers[tool.screen] || (() => { document.getElementById('tool-detail-body').innerHTML = '<p>Not built yet.</p>'; }))();
+}
+
+// ---------- AI CHAT (real chat UI, shared by every AI-tagged tool) ----------
+function openAiChat(tool) {
+  STATE.chat = { tool, messages: [] };
+  showScreen('tool-detail');
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[3].classList.add('active');
+
+  const quickChips = {
+    smart_solver: ['x² − 7x + 10 = 0', 'Differentiate 3x³ − 2x + 7', 'Balance: Fe + O₂ → Fe₂O₃'],
+    essay_grader: ['Paste an essay to grade →'],
+    answer_checker: ['Paste a question and your answer →'],
+    timetable_builder: ['Build me a study timetable for my exams'],
+  }[tool.key] || [];
+
+  document.getElementById('tool-detail-body').innerHTML = `
+    <div class="tool-detail-header"><h2>${tool.icon} ${escapeHtml(tool.name)}</h2><div class="sub">${escapeHtml(tool.desc)}</div></div>
+    <div class="chat-thread" id="chat-thread"></div>
+    ${quickChips.length ? `<div class="chat-quick-chips">${quickChips.map(c => `<button onclick="sendChatMessage(${JSON.stringify(c)})">${escapeHtml(c)}</button>`).join('')}</div>` : ''}
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendChatMessage()">
+      <button onclick="sendChatMessage()">➤</button>
+    </div>
+  `;
+  appendChatBubble('ai', `Hey ${STATE.profile?.full_name?.split(' ')[0] || 'there'} 👋 I'm Ace. ${tool.desc} What would you like to work on?`);
+}
+
+function appendChatBubble(role, text) {
+  const thread = document.getElementById('chat-thread');
+  const div = document.createElement('div');
+  div.className = 'chat-bubble ' + (role === 'user' ? 'user' : 'ai');
+  div.textContent = text;
+  thread.appendChild(div);
+  thread.scrollIntoView({ block: 'end' });
+}
+
+async function sendChatMessage(preset) {
+  const input = document.getElementById('chat-input');
+  const text = preset || input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendChatBubble('user', text);
+  STATE.chat.messages.push({ role: 'user', text });
+  appendChatBubble('ai', '…');
+  const thread = document.getElementById('chat-thread');
+  try {
+    const result = await AfriAceAI.ask(STATE.chat.tool.key, {
+      input: text,
+      history: STATE.chat.messages,
+      subjectContext: STATE.currentSubject?.name,
+    });
+    thread.lastChild.remove();
+    const answer = result?.answer || result?.text || 'No response text came back — check the anthropic-proxy function.';
+    appendChatBubble('ai', answer);
+    STATE.chat.messages.push({ role: 'assistant', text: answer });
+  } catch (e) {
+    thread.lastChild.remove();
+    appendChatBubble('ai', '⚠️ Could not reach Ace — the anthropic-proxy edge function needs to be deployed on your Supabase project.');
+  }
+}
+
+// ---------- MARK CALCULATOR (pure client-side, no backend needed) ----------
+function renderMarkCalculator() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🧮 Mark Calculator</h2><div class="sub">Find out what you need in your final exam</div></div>
+    <div class="field-block">
+      <label>Your Continuous Assessment mark</label>
+      <input type="number" id="mc-ca" placeholder="e.g. 65" min="0" max="100">
+      <p style="font-size:.72rem;color:var(--text3);margin-top:6px">Default weighting assumed: CA 30% / Final exam 70% — check your school's actual weighting, it varies by exam board.</p>
+    </div>
+    <div class="field-block">
+      <label>What are you aiming for overall?</label>
+      <div class="target-grid" id="mc-targets">
+        ${[40,50,60,70,80,90].map(t => `<button data-t="${t}" onclick="mcSelectTarget(${t})">${t}%</button>`).join('')}
+      </div>
+    </div>
+    <div id="mc-result"></div>
+  `;
+  STATE.mcTarget = null;
+}
+
+function mcSelectTarget(t) {
+  STATE.mcTarget = t;
+  document.querySelectorAll('#mc-targets button').forEach(b => b.classList.toggle('selected', Number(b.dataset.t) === t));
+  mcCalculate();
+}
+
+function mcCalculate() {
+  const ca = parseFloat(document.getElementById('mc-ca').value);
+  const resultEl = document.getElementById('mc-result');
+  if (isNaN(ca) || STATE.mcTarget == null) { resultEl.innerHTML = ''; return; }
+  const CA_WEIGHT = 0.3, EXAM_WEIGHT = 0.7;
+  const needed = (STATE.mcTarget - ca * CA_WEIGHT) / EXAM_WEIGHT;
+  resultEl.innerHTML = `
+    <div class="result-banner">
+      ${needed > 100
+        ? `<div>Not mathematically possible with a ${ca}% CA mark — even 100% in the exam won't reach ${STATE.mcTarget}%.</div>`
+        : needed < 0
+          ? `<div>Your CA mark alone already gets you there 🎉</div>`
+          : `<div class="big">${needed.toFixed(1)}%</div><div>needed in your final exam</div>`}
+    </div>
+  `;
+}
+if (!window._mcListenerBound) {
+  document.addEventListener('input', e => { if (e.target.id === 'mc-ca') mcCalculate(); });
+  window._mcListenerBound = true;
+}
+
+// ---------- TOPIC QUESTION BANK ----------
+async function renderQuestionBank() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🔍 Topic Question Bank</h2><div class="sub">Search practice questions across your subjects</div></div>
+    <div class="field-block" style="padding:8px"><input type="text" id="qb-search" placeholder="Search questions…" oninput="qbSearch()"></div>
+    <div class="qb-filters" id="qb-filters">
+      <button class="active" data-id="" onclick="qbFilterSubject('', this)">All</button>
+      ${STATE.subjects.map(s => `<button data-id="${s.id}" onclick="qbFilterSubject('${s.id}', this)">${escapeHtml(s.name)}</button>`).join('')}
+    </div>
+    <div id="qb-results"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>
+  `;
+  STATE.qbSubjectFilter = '';
+  await qbSearch();
+}
+
+async function qbFilterSubject(id, btn) {
+  document.querySelectorAll('#qb-filters button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  STATE.qbSubjectFilter = id;
+  await qbSearch();
+}
+
+async function qbSearch() {
+  const q = document.getElementById('qb-search')?.value.trim() || '';
+  const subjectIds = STATE.qbSubjectFilter ? [STATE.qbSubjectFilter] : STATE.subjects.map(s => s.id);
+  const el = document.getElementById('qb-results');
+  try {
+    const results = await AfriAceAcademic.searchQuestions(subjectIds, { search: q });
+    if (!results.length) { el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">No questions found.</p>'; return; }
+    el.innerHTML = `<p style="color:var(--text3);font-size:.78rem;margin-bottom:8px">${results.length} question${results.length===1?'':'s'} found</p>` +
+      results.map(q => `
+        <div class="qb-item">
+          <div class="qb-tags">${escapeHtml(q.subjects?.name || '')}${q.topics?.title ? ' · ' + escapeHtml(q.topics.title) : ''}${q.marks ? ' · ' + q.marks + ' marks' : ''}</div>
+          <div class="qb-text">${escapeHtml(q.question_text)}</div>
+          <button onclick="startQuiz('${q.subject_id}')">Practice →</button>
+        </div>
+      `).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Could not load questions right now.</p>';
+  }
+}
+
+// ---------- CONTINUOUS ASSESSMENT TRACKER ----------
+async function renderCaTracker() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>📊 Continuous Assessment Tracker</h2><div class="sub">Track tests, tasks & orals</div></div>
+    <div class="field-block">
+      <label>Add a mark</label>
+      <select id="ca-subject">${STATE.subjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}</select>
+      <input type="text" id="ca-component" placeholder="e.g. Test 1, Project, Oral" style="margin-top:8px">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input type="number" id="ca-score" placeholder="Score" style="flex:1">
+        <input type="number" id="ca-max" placeholder="Out of" value="100" style="flex:1">
+      </div>
+      <button class="primary" style="width:100%;margin-top:10px" onclick="caAddMark()">+ Add</button>
+    </div>
+    <div id="ca-list"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>
+  `;
+  await caLoadList();
+}
+
+async function caLoadList() {
+  const el = document.getElementById('ca-list');
+  try {
+    const marks = await AfriAceData.getContinuousAssessmentMarks(STATE.profile.id);
+    if (!marks.length) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">📋</div><div class="title">No marks yet</div><div class="sub">Add your first test, task or project above.</div></div>';
+      return;
+    }
+    const avg = Math.round(marks.reduce((s,m) => s + (m.score / (m.max_score||100))*100, 0) / marks.length);
+    el.innerHTML = `<div class="goal-card" style="text-align:center;margin-bottom:14px"><b style="font-size:1.3rem;color:var(--primary)">${avg}%</b><div style="font-size:.78rem;color:var(--text2)">Overall CA average</div></div>` +
+      marks.map(m => `
+        <div class="subject-card">
+          <div class="icon">📝</div>
+          <div style="flex:1"><div class="name">${escapeHtml(m.subjects?.name || '')} — ${escapeHtml(m.component || '')}</div><div class="meta">${m.source === 'teacher' ? 'Official — entered by your teacher' : 'Self-reported'}</div></div>
+          <div style="font-weight:800">${m.score}/${m.max_score}</div>
+        </div>
+      `).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Could not load your marks right now.</p>';
+  }
+}
+
+async function caAddMark() {
+  const subjectId = document.getElementById('ca-subject').value;
+  const component = document.getElementById('ca-component').value.trim();
+  const score = parseFloat(document.getElementById('ca-score').value);
+  const maxScore = parseFloat(document.getElementById('ca-max').value) || 100;
+  if (!component || isNaN(score)) { showToast('Fill in the component name and score.'); return; }
+  try {
+    await AfriAceData.addContinuousAssessmentMark(STATE.profile.id, STATE.profile.school_id, { subjectId, term: null, component, score, maxScore });
+    showToast('Mark added ✅');
+    await caLoadList();
+  } catch (e) {
+    showToast('Could not save that mark right now.');
+  }
+}
+
+// ---------- EXAM TIMETABLE ----------
+async function renderExamTimetable() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `<div class="tool-detail-header"><h2>📅 Exam Timetable</h2><div class="sub">Your school's exam schedule</div></div><div id="et-list"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>`;
+  const el = document.getElementById('et-list');
+  if (!STATE.profile?.school_id) { el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">No school on your account yet.</p>'; return; }
+  try {
+    const timetables = await AfriAceData.getExamTimetables(STATE.profile.school_id);
+    if (!timetables.length) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">📅</div><div class="title">Not published yet</div><div class="sub">Your school admin hasn\'t added an exam timetable yet.</div></div>';
+      return;
+    }
+    el.innerHTML = timetables.map(t => `
+      <div class="field-block">
+        <label style="margin-bottom:2px">${escapeHtml(t.label)}</label>
+        <pre style="white-space:pre-wrap;font-family:inherit;font-size:.85rem;color:var(--text2);margin:0">${escapeHtml(JSON.stringify(t.payload, null, 2))}</pre>
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Could not load the timetable right now.</p>';
+  }
+}
+
+// ---------- MY NOTES ----------
+async function renderMyNotes() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header" style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div><h2>📝 My Notes</h2><div class="sub">Write &amp; save notes per subject</div></div>
+      <button class="primary" style="padding:8px 14px;font-size:.82rem" onclick="editNote(null)">+ New</button>
+    </div>
+    <div id="notes-list"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>
+  `;
+  await notesReload();
+}
+
+async function notesReload() {
+  const el = document.getElementById('notes-list');
+  try {
+    const notes = await AfriAceData.getNotes(STATE.profile.id);
+    STATE.myNotes = notes;
+    if (!notes.length) { el.innerHTML = '<div class="empty-state"><div class="icon">📝</div><div class="title">No notes yet</div><div class="sub">Tap + New to start.</div></div>'; return; }
+    el.innerHTML = notes.map(n => `
+      <div class="subject-card" onclick="editNote('${n.id}')">
+        <div class="icon">📝</div>
+        <div style="flex:1"><div class="name">${escapeHtml(n.title)}</div><div class="meta">${n.subjects?.name ? escapeHtml(n.subjects.name) + ' · ' : ''}${new Date(n.updated_at).toLocaleDateString()}</div></div>
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Could not load your notes right now.</p>';
+  }
+}
+
+function editNote(id) {
+  const note = id ? STATE.myNotes.find(n => n.id === id) : null;
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>📝 ${note ? 'Edit note' : 'New note'}</h2></div>
+    <div class="field-block">
+      <label>Subject (optional)</label>
+      <select id="note-subject"><option value="">General</option>${STATE.subjects.map(s => `<option value="${s.id}" ${note?.subject_id===s.id?'selected':''}>${escapeHtml(s.name)}</option>`).join('')}</select>
+      <label style="margin-top:10px">Title</label>
+      <input type="text" id="note-title" value="${note ? escapeHtml(note.title) : ''}" placeholder="e.g. Quadratic formula tricks">
+      <label style="margin-top:10px">Note</label>
+      <textarea id="note-body" rows="8">${note ? escapeHtml(note.body || '') : ''}</textarea>
+    </div>
+    <button class="primary" style="width:100%" onclick="saveNoteHandler('${id || ''}')">Save</button>
+    ${note ? `<button class="guest-btn" style="width:100%;margin-top:8px;color:var(--red)" onclick="deleteNoteHandler('${id}')">Delete note</button>` : ''}
+  `;
+}
+
+async function saveNoteHandler(id) {
+  const title = document.getElementById('note-title').value.trim();
+  const body = document.getElementById('note-body').value;
+  const subjectId = document.getElementById('note-subject').value || null;
+  if (!title) { showToast('Give your note a title.'); return; }
+  try {
+    await AfriAceData.saveNote(STATE.profile.id, { id: id || null, subjectId, title, body });
+    showToast('Note saved ✅');
+    renderMyNotes();
+  } catch (e) { showToast('Could not save the note right now.'); }
+}
+
+async function deleteNoteHandler(id) {
+  if (!confirm('Delete this note?')) return;
+  try { await AfriAceData.deleteNote(id); renderMyNotes(); } catch (e) { showToast('Could not delete right now.'); }
+}
+
+// ---------- POMODORO TIMER (pure client-side) ----------
+function renderPomodoro() {
+  STATE.pomodoro = { secondsLeft: 25*60, running: false, session: 1, mode: 'focus' };
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🍅 Pomodoro Timer</h2></div>
+    <div class="field-block" style="text-align:center">
+      <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin-bottom:10px">STUDY SESSION</div>
+      <div style="width:150px;height:150px;border-radius:50%;border:6px solid var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto">
+        <div id="pomo-clock" style="font-size:1.8rem;font-weight:800;font-family:'JetBrains Mono',monospace">25:00</div>
+        <div id="pomo-mode" style="font-size:.68rem;color:var(--text3);font-weight:800">FOCUS</div>
+      </div>
+      <div style="margin-top:10px;color:var(--text2);font-size:.85rem">Session <span id="pomo-session">1</span> of 4</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
+        <button class="primary" style="padding:9px 20px" id="pomo-startbtn" onclick="pomoToggle()">▶ Start</button>
+        <button class="guest-btn" style="padding:9px 20px" onclick="pomoReset()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="tool-intro-card">💡 <b>Pomodoro Technique:</b> 25 min study → 5 min break → repeat 4× → 15 min long break. Proven to improve focus and prevent burnout.</div>
+  `;
+}
+
+function pomoToggle() {
+  const p = STATE.pomodoro;
+  p.running = !p.running;
+  document.getElementById('pomo-startbtn').textContent = p.running ? '⏸ Pause' : '▶ Start';
+  if (p.running) {
+    p.interval = setInterval(() => {
+      p.secondsLeft--;
+      if (p.secondsLeft <= 0) {
+        clearInterval(p.interval);
+        pomoAdvancePhase();
+      }
+      pomoRenderClock();
+    }, 1000);
+  } else {
+    clearInterval(p.interval);
+  }
+}
+
+function pomoAdvancePhase() {
+  const p = STATE.pomodoro;
+  if (p.mode === 'focus') {
+    p.mode = (p.session % 4 === 0) ? 'long_break' : 'break';
+    p.secondsLeft = p.mode === 'long_break' ? 15*60 : 5*60;
+  } else {
+    p.mode = 'focus';
+    p.session++;
+    p.secondsLeft = 25*60;
+  }
+  p.running = false;
+  document.getElementById('pomo-startbtn').textContent = '▶ Start';
+  document.getElementById('pomo-session').textContent = p.session;
+  showToast(p.mode === 'focus' ? 'Break\'s over — back to it 💪' : 'Nice work — take a break ☕');
+  pomoRenderClock();
+}
+
+function pomoRenderClock() {
+  const p = STATE.pomodoro;
+  const m = String(Math.floor(p.secondsLeft/60)).padStart(2,'0');
+  const s = String(p.secondsLeft%60).padStart(2,'0');
+  document.getElementById('pomo-clock').textContent = `${m}:${s}`;
+  document.getElementById('pomo-mode').textContent = p.mode === 'focus' ? 'FOCUS' : p.mode === 'break' ? 'BREAK' : 'LONG BREAK';
+}
+
+function pomoReset() {
+  clearInterval(STATE.pomodoro?.interval);
+  renderPomodoro();
+}
+
+// ---------- WELLNESS HUB ----------
+// IMPORTANT: crisis line numbers below are PLACEHOLDERS. Real, current
+// crisis/helpline numbers must be verified per country before this ships —
+// showing a wrong number in a mental-health crisis screen is genuinely
+// dangerous, so none are guessed here.
+function renderWellness() {
+  const body = document.getElementById('tool-detail-body');
+  const countryName = STATE.academicProfile?.countries?.name || 'your country';
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🧘 Wellness Hub</h2></div>
+    <div class="tool-intro-card">Exams are tough. Your mental health matters — here are resources to help you stay balanced.</div>
+    <div class="field-block" style="border-color:var(--red)">
+      <label style="color:var(--red)">⚠️ Crisis support in ${escapeHtml(countryName)}</label>
+      <p style="font-size:.82rem;color:var(--text2);line-height:1.5">
+        <b>Placeholder — not yet verified.</b> Before launch, replace this with a real, currently-active crisis helpline
+        for ${escapeHtml(countryName)} (and each other AfriAce country). If you're a student reading this in the meantime
+        and need to talk to someone urgently, please reach out to a trusted teacher, school counsellor, or family member right away.
+      </p>
+    </div>
+    <div class="field-block">
+      <label>💚 Quick check-in</label>
+      <p style="font-size:.82rem;color:var(--text2)">A short daily mood check-in can help you notice patterns over time.</p>
+      <button class="primary" style="width:100%;margin-top:8px" onclick="openCheckin()">Check in now</button>
+    </div>
+  `;
+}
+
+// ---------- STUDY REMINDERS ----------
+const REMINDER_CATEGORIES = [
+  { label: 'School & Class', items: [
+    ['new_task_assigned', 'New task assigned', 'Instant alert when your teacher assigns work'],
+    ['task_due_reminders', 'Task due date reminders', '3 days before, 1 day before, and day-of'],
+    ['work_graded', 'Work graded', 'Notify when your teacher marks your submission'],
+    ['class_announcements', 'Class announcements', 'Notices posted to your class by staff'],
+  ]},
+  { label: 'Live Events', items: [
+    ['live_quiz_started', 'Live quiz started', 'Alert the moment your teacher launches a live quiz'],
+    ['live_class_started', 'Live class started', 'Alert when your teacher goes live on video'],
+  ]},
+  { label: 'Personal Study', items: [
+    ['daily_challenge_reminder', 'Daily challenge reminder', 'Nudge if you haven\'t done today\'s questions'],
+    ['exam_countdown', 'Exam countdown', 'Daily reminder in the weeks before your exam'],
+  ]},
+];
+
+async function renderStudyReminders() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `<div class="tool-detail-header"><h2>🔔 Study Reminders</h2></div><div id="sr-list"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>`;
+  let prefs;
+  try { prefs = await AfriAceData.getReminderPrefs(STATE.profile.id); } catch (e) { prefs = null; }
+  STATE.reminderPrefs = prefs || { daily_reminder: true, streak_alert: true, weekly_progress_report: false, extra_settings: {} };
+  const extra = STATE.reminderPrefs.extra_settings || {};
+  const el = document.getElementById('sr-list');
+  el.innerHTML = REMINDER_CATEGORIES.map(cat => `
+    <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin:14px 0 8px">${cat.label.toUpperCase()}</div>
+    ${cat.items.map(([key, title, desc]) => `
+      <div class="profile-row" onclick="toggleExtraReminder('${key}')">
+        <div class="left" style="flex-direction:column;align-items:flex-start;gap:2px"><b>${escapeHtml(title)}</b><span style="font-weight:400;font-size:.72rem;color:var(--text3)">${escapeHtml(desc)}</span></div>
+        <div class="toggle-switch ${extra[key] !== false ? 'on' : ''}" id="sr-toggle-${key}"><div class="knob"></div></div>
+      </div>
+    `).join('')}
+  `).join('');
+}
+
+async function toggleExtraReminder(key) {
+  const extra = { ...(STATE.reminderPrefs.extra_settings || {}) };
+  extra[key] = !(extra[key] !== false);
+  STATE.reminderPrefs.extra_settings = extra;
+  document.getElementById('sr-toggle-' + key).classList.toggle('on');
+  try {
+    await AfriAceData.setReminderPrefs(STATE.profile.id, {
+      daily_reminder: STATE.reminderPrefs.daily_reminder !== false,
+      streak_alert: STATE.reminderPrefs.streak_alert !== false,
+      weekly_progress_report: STATE.reminderPrefs.weekly_progress_report === true,
+      extra_settings: extra,
+    });
+  } catch (e) {
+    showToast('Could not save that preference — has migration 010 been run?');
+  }
+}
+
+// ---------- CAREER PATHWAYS (WASSCE aggregate — real WAEC A1–F9 scale, not South Africa's APS) ----------
+const WASSCE_GRADE_POINTS = { A1:1, B2:2, B3:3, C4:4, C5:5, C6:6, D7:7, E8:8, F9:9 };
+
+function renderCareer() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🎓 Career Pathways</h2><div class="sub">WASSCE grade aggregate calculator</div></div>
+    <div class="tool-intro-card">
+      Enter your WASSCE grade (A1–F9) for up to 9 subjects. Your aggregate is the sum of your <b>best 6</b> subjects —
+      lower is better. Note: some institutions and courses (and Nigeria's JAMB/UTME) apply their own additional
+      requirements on top of this — always check the specific programme's entry requirements too.
+    </div>
+    <div class="field-block" id="wassce-inputs">
+      ${Array.from({length: 9}).map((_,i) => `
+        <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+          <input type="text" placeholder="Subject ${i+1}" id="wassce-subj-${i}" style="flex:2">
+          <select id="wassce-grade-${i}" style="flex:1" onchange="wassceCalc()">
+            <option value="">Grade</option>
+            ${Object.keys(WASSCE_GRADE_POINTS).map(g => `<option value="${g}">${g}</option>`).join('')}
+          </select>
+        </div>
+      `).join('')}
+    </div>
+    <div id="wassce-result"></div>
+  `;
+}
+
+function wassceCalc() {
+  const points = [];
+  for (let i = 0; i < 9; i++) {
+    const grade = document.getElementById('wassce-grade-' + i)?.value;
+    if (grade) points.push(WASSCE_GRADE_POINTS[grade]);
+  }
+  const resultEl = document.getElementById('wassce-result');
+  if (points.length < 6) { resultEl.innerHTML = `<p style="color:var(--text3);font-size:.82rem;margin-top:8px">Enter at least 6 grades to see your aggregate.</p>`; return; }
+  const best6 = points.sort((a,b) => a-b).slice(0,6);
+  const aggregate = best6.reduce((a,b) => a+b, 0);
+  resultEl.innerHTML = `<div class="result-banner"><div class="big">${aggregate}</div><div>aggregate (best 6 subjects, lower is better)</div></div>`;
+}
+
+// ---------- APPLICATION TRACKER ----------
+async function renderApplications() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>📋 Application Tracker</h2><div class="sub">Tertiary deadlines & status</div></div>
+    <div class="field-block">
+      <label>Institution</label>
+      <input type="text" id="app-institution" placeholder="e.g. University of Lagos, KNUST">
+      <label style="margin-top:8px">Course / Programme</label>
+      <input type="text" id="app-programme" placeholder="e.g. BSc Computer Science">
+      <label style="margin-top:8px">Application deadline</label>
+      <input type="date" id="app-deadline">
+      <label style="margin-top:8px">Financial aid / scholarship notes (optional)</label>
+      <input type="text" id="app-aid" placeholder="e.g. Applying for a state scholarship">
+      <button class="primary" style="width:100%;margin-top:10px" onclick="addApplicationHandler()">+ Add Application</button>
+    </div>
+    <div id="app-list"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>
+  `;
+  await appsReload();
+}
+
+async function appsReload() {
+  const el = document.getElementById('app-list');
+  try {
+    const apps = await AfriAceData.getApplications(STATE.profile.id);
+    if (!apps.length) { el.innerHTML = '<div class="empty-state"><div class="icon">📋</div><div class="title">No applications yet</div><div class="sub">Add your first one above.</div></div>'; return; }
+    el.innerHTML = apps.map(a => `
+      <div class="subject-card">
+        <div class="icon">🎓</div>
+        <div style="flex:1"><div class="name">${escapeHtml(a.institution)}</div><div class="meta">${escapeHtml(a.programme || '')}${a.deadline ? ' · Due ' + a.deadline : ''}</div></div>
+        <div class="context-chip">${escapeHtml(a.status)}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Could not load your applications right now.</p>';
+  }
+}
+
+async function addApplicationHandler() {
+  const institution = document.getElementById('app-institution').value.trim();
+  const programme = document.getElementById('app-programme').value.trim();
+  const deadline = document.getElementById('app-deadline').value || null;
+  const aid = document.getElementById('app-aid').value.trim() || null;
+  if (!institution) { showToast('Enter an institution name.'); return; }
+  try {
+    await AfriAceData.addApplication(STATE.profile.id, { institution, programme, deadline, financialAidNote: aid });
+    showToast('Application added ✅');
+    await appsReload();
+  } catch (e) { showToast('Could not save that right now.'); }
+}
+
+// ---------- SHARE WITH PARENT ----------
+function renderShareParent() {
+  const body = document.getElementById('tool-detail-body');
+  const stats = STATE.homeStats || { questionsDone: 0, avgScorePct: 0 };
+  const streak = STATE.streak?.current_streak ?? 0;
+  const xp = STATE.xp?.total_xp ?? 0;
+  const name = STATE.profile?.full_name || 'Your student';
+  const summaryText = `${name}'s AfriAce progress: ${streak} day streak, ${xp} XP earned, ${stats.questionsDone} questions done, ${stats.avgScorePct ?? 0}% average score.`;
+
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>👨‍👩‍👧 Share with Parent</h2><div class="sub">Share a snapshot of your progress — no login needed on their side</div></div>
+    <div class="profile-stats-row">
+      <div><div class="num">${streak}</div><div class="lbl">Day Streak</div></div>
+      <div><div class="num">${xp}</div><div class="lbl">XP</div></div>
+      <div><div class="num">${stats.avgScorePct ?? 0}%</div><div class="lbl">Avg Score</div></div>
+    </div>
+    <div class="field-block">
+      <label>Parent email (optional, for the email option)</label>
+      <input type="email" id="share-parent-email" placeholder="parent@example.com">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="primary" style="flex:1" onclick="shareParentEmail()">✉️ Email</button>
+        <button class="primary" style="flex:1;background:#25D366" onclick="shareParentWhatsapp()">📱 WhatsApp</button>
+      </div>
+    </div>
+  `;
+  STATE.shareSummaryText = summaryText;
+}
+
+function shareParentEmail() {
+  const email = document.getElementById('share-parent-email').value.trim();
+  const subject = encodeURIComponent('AfriAce progress report');
+  const bodyText = encodeURIComponent(STATE.shareSummaryText);
+  window.location.href = `mailto:${email}?subject=${subject}&body=${bodyText}`;
+}
+
+function shareParentWhatsapp() {
+  window.open(`https://wa.me/?text=${encodeURIComponent(STATE.shareSummaryText)}`, '_blank');
+}
+
+// ---------- LIBRARY ----------
+async function renderLibrary() {
+  const el = document.getElementById('library-list');
+  el.innerHTML = '<p style="color:var(--text3);font-size:.85rem;">Loading…</p>';
+  try {
+    const resources = STATE.currentSubject
+      ? await AfriAceData.getLibraryResources(STATE.currentSubject.id)
+      : await AfriAceData.getLibraryResources();
+    STATE.libraryResources = resources;
+    renderLibraryList(resources);
+  } catch (e) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><div class="title">No resources yet</div><div class="sub">Your teacher hasn\'t uploaded any resources yet. Check back soon!</div></div>';
+  }
+}
+
+function renderLibraryList(resources) {
+  const el = document.getElementById('library-list');
+  if (!resources?.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><div class="title">No resources yet</div><div class="sub">Your teacher hasn\'t uploaded any resources yet. Check back soon!</div></div>';
+    return;
+  }
+  el.innerHTML = resources.map(r => `
+    <div class="subject-card" onclick="window.open('${r.file_url || '#'}', '_blank')">
+      <div class="icon">${r.resource_type === 'video' ? '🎥' : r.resource_type === 'audio' ? '🎧' : '📄'}</div>
+      <div><div class="name">${escapeHtml(r.title)}</div><div class="meta">${escapeHtml(r.resource_type || 'file')}</div></div>
+    </div>
+  `).join('');
+}
+
+function filterLibrary(query) {
+  const q = query.trim().toLowerCase();
+  const filtered = (STATE.libraryResources || []).filter(r => r.title.toLowerCase().includes(q));
+  renderLibraryList(filtered);
+}
+
+// ---------- COMMUNITY ----------
+async function setCommunityTab(tab, btn) {
+  document.querySelectorAll('.community-tabs button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else document.querySelector('.community-tabs button').classList.add('active');
+  const el = document.getElementById('community-body');
+
+  if (tab === 'forum') {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem;">Loading…</p>';
+    try {
+      const posts = await AfriAceData.getForumPosts(20);
+      el.innerHTML = `
+        <div class="community-meta"><span>${posts.length} active discussion${posts.length===1?'':'s'}</span><button onclick="showToast('Posting UI is a follow-up pass')">+ Post</button></div>
+        ${posts.length ? posts.map(p => `
+          <div class="subject-card"><div class="icon">💬</div><div><div class="name">${escapeHtml(p.title || 'Discussion')}</div><div class="meta">${escapeHtml((p.body||'').slice(0,60))}</div></div></div>
+        `).join('') : '<div class="empty-state"><div class="icon">💬</div><div class="title">No posts yet</div><div class="sub">Be the first to start a discussion!</div></div>'}
+      `;
+    } catch (e) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">💬</div><div class="title">No posts yet</div><div class="sub">Be the first to start a discussion!</div></div>';
+    }
+  } else if (tab === 'rankings') {
+    el.innerHTML = '<div id="community-rankings"></div>';
+    await renderProgress(); // reuses the leaderboard data/markup source
+    document.getElementById('community-rankings').innerHTML = document.getElementById('progress-leaderboard')?.innerHTML || '';
+  } else {
+    el.innerHTML = `<div class="empty-state"><div class="icon">${tab === 'groups' ? '👥' : '💭'}</div><div class="title">Nothing here yet</div><div class="sub">${tab === 'groups' ? 'Study groups are' : 'Feedback threads are'} a follow-up build pass.</div></div>`;
+  }
+}
+
+async function renderProgress() {
+  if (window.renderProgressWeak) renderProgressWeak();
+  document.getElementById('progress-xp').textContent = STATE.xp?.total_xp ?? 0;
+  document.getElementById('progress-streak').textContent = STATE.streak?.current_streak ?? 0;
+  const el = document.getElementById('progress-leaderboard');
+  if (!STATE.profile?.school_id) { el.innerHTML = ''; return; }
+  try {
+    const board = await AfriAceData.getLeaderboard(STATE.profile.school_id, 5);
+    if (!board?.length) {
+      el.innerHTML = '<p style="color:var(--text3);font-size:.85rem;">No leaderboard data yet — be the first to earn XP!</p>';
+      return;
+    }
+    el.innerHTML = board.map((row, i) => `
+      <div class="subject-card">
+        <div class="icon">${['🥇','🥈','🥉'][i] || (i+1)}</div>
+        <div style="flex:1"><div class="name">${escapeHtml(row.users?.full_name || 'Student')}${row.user_id === STATE.profile.id ? ' (You)' : ''}</div></div>
+        <div style="font-weight:800;color:var(--gold)">${row.total_xp} XP</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem;">Leaderboard unavailable right now.</p>';
+  }
+}
+
+// ---------- AUTH ----------
+let LOGIN_TAB = 'student'; // 'student' | 'staff' — same form, used to route post-login redirect/expectation
+
+function setLoginTab(tab) {
+  LOGIN_TAB = tab;
+  document.getElementById('tab-student').classList.toggle('active', tab === 'student');
+  document.getElementById('tab-staff').classList.toggle('active', tab === 'staff');
+}
+
+async function handleSignIn() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  if (!email || !password) { errEl.textContent = 'Enter your email/username and password.'; return; }
+  try {
+    await AfriAceAuth.signIn(email, password);
+    await bootApp();
+  } catch (e) {
+    errEl.textContent = e.message || 'Sign in failed — check your details and try again.';
+  }
+}
+
+async function handleForgotPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  if (!email) { errEl.textContent = 'Enter your email above first, then tap Reset.'; return; }
+  try {
+    await AfriAceAuth.requestPasswordReset(email);
+    showToast('Password reset link sent — check your email.');
+  } catch (e) {
+    errEl.textContent = e.message || 'Could not send reset link.';
+  }
+}
+
+function handleGuestTour() {
+  // Read-only tour: no login, no writes, no AI calls — just lets a visitor
+  // click through the shell. Real data screens still show their normal
+  // "not signed in" empty states since there's no session to query with.
+  window.GUEST_MODE = true;
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('app').classList.add('ready');
+  document.getElementById('home-greeting').textContent = 'Welcome 👋';
+  document.getElementById('home-context').textContent = 'You\'re on a guided tour — sign in to see your real subjects and progress.';
+  document.getElementById('home-subjects-list').innerHTML =
+    '<p style="color:var(--text3);font-size:.85rem;">Sign in to load your subjects.</p>';
+  showToast('Tour mode — sign in anytime from Profile.');
+}
+
+async function handleSignOut() {
+  await AfriAceAuth.signOut();
+  window.GUEST_MODE = false;
+  document.getElementById('app').classList.remove('ready');
+  document.getElementById('screen-login').classList.add('active');
+}
+
+// ---------- BOOT ----------
+async function bootApp() {
+  if (window.AFRIACE_LOAD_ERROR || !window.AfriAceAuth) {
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('screen-login').classList.add('active');
+    document.getElementById('login-load-error').style.display = 'block';
+    return;
+  }
+  const session = await AfriAceAuth.getSession();
+  if (!session) {
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('screen-login').classList.add('active');
+    return;
+  }
+  document.getElementById('screen-login').classList.remove('active');
+
+  const profile = await AfriAceUser.getProfile();
+  STATE.profile = profile;
+
+  if (profile.role !== 'student') {
+    // The real MatricAce login is a single shared gate that auto-routes
+    // Staff accounts to their own portal file. Those files (teacher.html,
+    // subject-teacher.html, school-admin.html, super-admin.html) are
+    // separate build passes, not yet present alongside this one — so for
+    // now this is a clear message rather than a redirect into a 404.
+    const portalFile = await AfriAceUser.getPortalFile();
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('screen-login').classList.add('active');
+    document.getElementById('login-err').textContent =
+      `This is a ${profile.role.replace('_',' ')} account — it belongs on ${portalFile}, which isn't built yet in this pass.`;
+    await AfriAceAuth.signOut();
+    return;
+  }
+
+  const schoolConfigs = profile.school_id ? await AfriAceAcademic.getSchoolAcademicConfig(profile.school_id) : [];
+  STATE.schoolConfig = schoolConfigs?.[0] || null;
+
+  let academic = await AfriAceAcademic.getStudentProfile(profile.id);
+  STATE.academicProfile = academic;
+
+  renderHeader();
+
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('app').classList.add('ready');
+
+  // Onboarding wizard: a student with no level or no subjects picked yet
+  // hasn't completed setup, matching the real "Welcome to MatricAce!"
+  // first-run flow.
+  if (!academic || !academic.level_id || !academic.subject_ids?.length) {
+    openWizard();
+    return;
+  }
+
+  await loadHomeData();
+}
+
+async function loadHomeData() {
+  const academic = STATE.academicProfile;
+  const sc = STATE.schoolConfig;
+
+  document.getElementById('home-greeting').textContent =
+    'Hi, ' + (STATE.profile.full_name ? STATE.profile.full_name.split(' ')[0] : 'there') + ' 👋';
+  document.getElementById('home-context').textContent = academic?.countries?.name
+    ? `${academic.countries.name} · ${academic.examinations?.code || ''}`
+    : 'Academic profile not set up yet — contact your school admin.';
+
+  // Countdown: only shown if the school has actually set an exam_date —
+  // no fabricated numbers when it hasn't.
+  if (STATE.countdownInterval) clearInterval(STATE.countdownInterval);
+  if (sc?.exam_date) {
+    document.getElementById('home-countdown').style.display = 'grid';
+    document.getElementById('home-exam-pill').style.display = 'block';
+    const tick = () => {
+      const diff = new Date(sc.exam_date + 'T00:00:00') - new Date();
+      const days = Math.max(0, Math.floor(diff / 86400000));
+      const hours = Math.max(0, Math.floor((diff % 86400000) / 3600000));
+      const mins = Math.max(0, Math.floor((diff % 3600000) / 60000));
+      const secs = Math.max(0, Math.floor((diff % 60000) / 1000));
+      document.getElementById('cd-days').textContent = String(days).padStart(3,'0');
+      document.getElementById('cd-hours').textContent = hours;
+      document.getElementById('cd-mins').textContent = mins;
+      document.getElementById('cd-secs').textContent = secs;
+      document.getElementById('home-exam-pill').textContent = `🎟 ${days} days to exam`;
+    };
+    tick();
+    STATE.countdownInterval = setInterval(tick, 1000);
+  } else {
+    document.getElementById('home-countdown').style.display = 'none';
+    document.getElementById('home-exam-pill').style.display = 'none';
+  }
+
+  if (academic?.syllabus_version_id) {
+    STATE.subjects = await AfriAceAcademic.getSubjects(academic.syllabus_version_id);
+  }
+  renderHomeSubjects();
+  renderExploreRow();
+
+  try {
+    STATE.streak = await AfriAceData.getStreak(STATE.profile.id);
+    STATE.xp = await AfriAceData.getXp(STATE.profile.id);
+    renderHeader();
+    document.getElementById('stat-streak').textContent = STATE.streak?.current_streak ?? 0;
+  } catch (e) { console.warn('Could not load streak/XP', e); }
+
+  try {
+    const stats = await AfriAceData.getStudentStatsSummary(STATE.profile.id);
+    STATE.homeStats = stats;
+    document.getElementById('stat-questions').textContent = stats.questionsDone;
+    document.getElementById('stat-avgscore').textContent = stats.avgScorePct != null ? stats.avgScorePct + '%' : '—';
+  } catch (e) { console.warn('Could not load stats summary', e); }
+
+  try {
+    const todayCount = await AfriAceData.getTodayQuestionCount(STATE.profile.id);
+    const goal = academic?.daily_goal_questions || 10;
+    document.getElementById('goal-target').textContent = goal;
+    document.getElementById('goal-ring').textContent = `${Math.min(todayCount, goal)}/${goal}`;
+    document.getElementById('goal-remaining').textContent = todayCount >= goal
+      ? 'Goal complete for today 🎉'
+      : `${goal - todayCount} question${goal - todayCount === 1 ? '' : 's'} left to hit your daily goal 💪`;
+  } catch (e) { console.warn('Could not load today\'s goal progress', e); }
+
+  try {
+    const recent = await AfriAceData.getRecentSessions(STATE.profile.id, 5);
+    renderRecentActivity(recent);
+  } catch (e) { console.warn('Could not load recent activity', e); }
+}
+
+function renderExploreRow() {
+  const keys = ['arcade','career','study_groups','flashcards','weak_topic_radar','study_planner'];
+  const items = keys.map(k => TOOLS_CATALOG.flatMap(c => c.items).find(t => t.key === k)).filter(Boolean);
+  document.getElementById('home-explore').innerHTML = items.map(t => `
+    <div class="ex-item" onclick="openTool('${t.key}')"><span class="ic">${t.icon}</span><span>${escapeHtml(t.name.split(' ')[0])}</span></div>
+  `).join('');
+}
+
+function practiceForGoal() {
+  if (STATE.subjects.length) startQuiz(STATE.subjects[0].id);
+  else showToast('Pick your subjects first — go to Profile → Selected subjects.');
+}
+
+async function openCheckin() {
+  const mood = prompt('How are you feeling today? (e.g. great, okay, stressed, tired)');
+  if (!mood) return;
+  try {
+    await AfriAceData.submitWellnessCheckin(STATE.profile.id, mood);
+    showToast('Thanks for checking in 💛');
+  } catch (e) {
+    showToast('Could not save your check-in right now.');
+  }
+}
+
+async function handleJoinClass() {
+  const code = prompt('Enter your class code:');
+  if (!code) return;
+  try {
+    const result = await AfriAceData.joinClassByCode(code.trim());
+    STATE.myClassId = result.classId;
+    showToast(`Joined ${result.className} 🎉`);
+  } catch (e) {
+    showToast(e.message || 'Could not join that class.');
+  }
+}
+
+// ---------- CLASS STREAM ----------
+async function renderClassStream() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `<div class="tool-detail-header"><h2>📡 Class Stream</h2></div><div id="cs-body"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>`;
+  const el = document.getElementById('cs-body');
+  try {
+    const classId = STATE.myClassId ?? await AfriAceData.getMyClassId(STATE.profile.id);
+    STATE.myClassId = classId;
+    if (!classId) { el.innerHTML = '<div class="empty-state"><div class="icon">🏫</div><div class="title">Join a class to see the stream</div><div class="sub">Use "Join Class" on Home with the code your teacher shared.</div></div>'; return; }
+    const posts = await AfriAceData.getClassStream(classId);
+    if (!posts.length) { el.innerHTML = '<div class="empty-state"><div class="icon">📡</div><div class="title">Nothing posted yet</div><div class="sub">Your teacher hasn\'t posted to the stream yet.</div></div>'; return; }
+    el.innerHTML = posts.map(p => `
+      <div class="subject-card">
+        <div class="icon">📡</div>
+        <div style="flex:1"><div class="name">${escapeHtml(p.users?.full_name || 'Teacher')}</div><div class="meta">${escapeHtml(p.content || '')} · ${new Date(p.created_at).toLocaleDateString()}</div></div>
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Could not load the stream right now.</p>';
+  }
+}
+
+// ---------- LIVE VIDEO CLASS ----------
+async function renderLiveVideo() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🎥 Live Video Class</h2></div>
+    <div class="tool-intro-card" style="text-align:center">
+      <div style="font-size:2rem">📹</div>
+      <p style="margin-top:8px">When your teacher starts a live class, you'll get a notification and can join here instantly.</p>
+    </div>
+    <button class="primary" style="width:100%" onclick="checkForLiveClass()">🔄 Check for Live Class</button>
+    <p id="live-status" style="text-align:center;color:var(--text3);font-size:.82rem;margin-top:10px"></p>
+  `;
+  await checkForLiveClass();
+}
+
+async function checkForLiveClass() {
+  const el = document.getElementById('live-status');
+  try {
+    const classId = STATE.myClassId ?? await AfriAceData.getMyClassId(STATE.profile.id);
+    STATE.myClassId = classId;
+    if (!classId) { el.textContent = 'Not linked to a class — join one from Home first.'; return; }
+    const sessions = await AfriAceData.getLiveSessions(classId);
+    const now = new Date();
+    const active = sessions.find(s => new Date(s.starts_at) <= now && (!s.ends_at || new Date(s.ends_at) >= now));
+    if (active) {
+      el.innerHTML = `<a href="${escapeHtml(active.join_url || '#')}" target="_blank" style="color:var(--green);font-weight:800">🔴 ${escapeHtml(active.title || 'Live now')} — tap to join</a>`;
+    } else {
+      el.textContent = 'No live class right now.';
+    }
+  } catch (e) {
+    el.textContent = 'Could not check right now.';
+  }
+}
+
+// ---------- STUDY GROUPS ----------
+async function renderStudyGroups() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>👥 Study Groups</h2><div class="sub">Share notes, compete on leaderboards, keep each other accountable</div></div>
+    <div class="field-block">
+      <label>Create a group</label>
+      <input type="text" id="sg-name" placeholder="Group name">
+      <button class="primary" style="width:100%;margin-top:8px" onclick="createGroupHandler()">+ Create</button>
+    </div>
+    <div class="field-block">
+      <label>🔑 Join with code</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="sg-code" placeholder="GROUP CODE" style="flex:1;text-transform:uppercase">
+        <button class="primary" style="padding:0 16px" onclick="joinGroupHandler()">Join</button>
+      </div>
+    </div>
+    <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin:14px 0 8px">MY GROUPS</div>
+    <div id="sg-mygroups"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>
+  `;
+  await sgReload();
+}
+
+async function sgReload() {
+  const el = document.getElementById('sg-mygroups');
+  try {
+    const groups = await AfriAceData.getMyStudyGroups(STATE.profile.id);
+    if (!groups.length) { el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">No groups yet — create one or join with a code.</p>'; return; }
+    el.innerHTML = groups.map(g => `
+      <div class="subject-card">
+        <div class="icon">👥</div>
+        <div style="flex:1"><div class="name">${escapeHtml(g.name)}</div><div class="meta">Code: ${escapeHtml(g.group_code || '—')}</div></div>
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Could not load your groups right now.</p>';
+  }
+}
+
+async function createGroupHandler() {
+  const name = document.getElementById('sg-name').value.trim();
+  if (!name) { showToast('Give your group a name.'); return; }
+  try {
+    const group = await AfriAceData.createStudyGroup(STATE.profile.id, name, STATE.currentSubject?.id || null);
+    showToast(`Group created — code: ${group.group_code}`);
+    await sgReload();
+  } catch (e) { showToast('Could not create the group right now.'); }
+}
+
+async function joinGroupHandler() {
+  const code = document.getElementById('sg-code').value.trim();
+  if (!code) return;
+  try {
+    const group = await AfriAceData.joinStudyGroupByCode(STATE.profile.id, code);
+    showToast(`Joined ${group.name} 🎉`);
+    await sgReload();
+  } catch (e) { showToast(e.message || 'Could not join that group.'); }
+}
+
+// ---------- WRITE & SCAN ----------
+function renderWriteScan() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>📸 Write &amp; Scan</h2><div class="sub">Snap your handwritten answer — AI marks it</div></div>
+    <div class="field-block">
+      <label>Subject</label>
+      <select id="ws-subject">${STATE.subjects.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('')}</select>
+      <label style="margin-top:10px">Question (optional)</label>
+      <input type="text" id="ws-question" placeholder="e.g. Solve for x: 2x² + 5x − 3 = 0">
+    </div>
+    <div class="upload-drop" id="ws-drop" onclick="document.getElementById('ws-file').click()">
+      <div class="icon">📷</div>
+      <div style="font-weight:700">Tap to snap or upload photo</div>
+      <div style="font-size:.75rem;color:var(--text3);margin-top:2px">Write your answer on paper, photograph it clearly</div>
+    </div>
+    <input type="file" id="ws-file" accept="image/*" capture="environment" style="display:none" onchange="wsFileChosen(event)">
+    <button class="primary" style="width:100%" id="ws-grade-btn" disabled onclick="wsGrade()">🤖 Grade My Answer</button>
+    <div id="ws-result" style="margin-top:14px"></div>
+  `;
+  STATE.wsImage = null;
+}
+
+function wsFileChosen(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const base64 = reader.result.split(',')[1];
+    STATE.wsImage = { data: base64, mediaType: file.type };
+    document.getElementById('ws-drop').innerHTML = `<img class="upload-preview" src="${reader.result}">`;
+    document.getElementById('ws-grade-btn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function wsGrade() {
+  if (!STATE.wsImage) { showToast('Add a photo first.'); return; }
+  const subject = document.getElementById('ws-subject').value;
+  const question = document.getElementById('ws-question').value.trim() || 'Please read and mark this handwritten answer.';
+  const resultEl = document.getElementById('ws-result');
+  resultEl.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Ace is reading your answer…</p>';
+  try {
+    const result = await AfriAceAI.ask('write_scan', { input: question, subjectContext: subject, image: STATE.wsImage });
+    resultEl.innerHTML = `<div class="notes-block">${escapeHtml(result?.answer || 'No response text came back.')}</div>`;
+  } catch (e) {
+    resultEl.innerHTML = '<p style="color:var(--red);font-size:.85rem">⚠️ Could not reach Ace — the anthropic-proxy edge function needs to be deployed with vision support.</p>';
+  }
+}
+
+// ---------- OFFLINE DOWNLOADS (real Cache Storage, not a fake progress bar) ----------
+const OFFLINE_CACHE_NAME = 'afriace-offline-data';
+
+async function renderOffline() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>📥 Offline Downloads</h2><div class="sub">Study without data — saved content works without internet</div></div>
+    <button class="primary" style="width:100%;margin-bottom:12px" onclick="downloadAllSubjects()">📥 Download All Subjects</button>
+    <div id="offline-list">${STATE.subjects.map(s => `
+      <div class="offline-row" id="offline-row-${s.id}">
+        <div class="top"><div><div class="name">${escapeHtml(s.name)}</div><div class="meta" id="offline-meta-${s.id}">Checking…</div></div></div>
+        <button class="save" id="offline-btn-${s.id}" onclick="toggleOfflineSubject('${s.id}', '${escapeHtml(s.name)}')">Checking…</button>
+      </div>
+    `).join('')}</div>
+  `;
+  for (const s of STATE.subjects) await refreshOfflineRow(s.id);
+}
+
+async function refreshOfflineRow(subjectId) {
+  if (!('caches' in window)) { document.getElementById('offline-btn-' + subjectId).textContent = 'Not supported'; return; }
+  try {
+    const cache = await caches.open(OFFLINE_CACHE_NAME);
+    const match = await cache.match('/offline/' + subjectId);
+    const btn = document.getElementById('offline-btn-' + subjectId);
+    const meta = document.getElementById('offline-meta-' + subjectId);
+    if (match) {
+      const cached = await match.json();
+      meta.textContent = `${cached.questions?.length || 0} questions saved`;
+      btn.textContent = '✅ Saved — tap to remove';
+      btn.className = 'saved';
+    } else {
+      meta.textContent = 'Not saved';
+      btn.textContent = '📥 Save for offline';
+      btn.className = 'save';
+    }
+  } catch (e) { /* leave as Checking… if this fails */ }
+}
+
+async function toggleOfflineSubject(subjectId, subjectName) {
+  const cache = await caches.open(OFFLINE_CACHE_NAME);
+  const existing = await cache.match('/offline/' + subjectId);
+  if (existing) {
+    await cache.delete('/offline/' + subjectId);
+    showToast(`${subjectName} removed from offline storage`);
+  } else {
+    showToast(`Saving ${subjectName}…`);
+    try {
+      const [topics, questions] = await Promise.all([
+        AfriAceAcademic.getTopics(subjectId),
+        AfriAceAcademic.getQuestions(subjectId, { limit: 50 }),
+      ]);
+      const notesResults = await Promise.all(topics.map(t => AfriAceAcademic.getSubjectNotes(t.id)));
+      const payload = { subjectId, subjectName, topics, notes: notesResults.filter(Boolean), questions, savedAt: new Date().toISOString() };
+      await cache.put('/offline/' + subjectId, new Response(JSON.stringify(payload), { headers: { 'Content-Type': 'application/json' } }));
+      showToast(`${subjectName} saved for offline ✅`);
+    } catch (e) {
+      showToast(`Could not save ${subjectName} right now.`);
+    }
+  }
+  await refreshOfflineRow(subjectId);
+}
+
+async function downloadAllSubjects() {
+  for (const s of STATE.subjects) {
+    const cache = await caches.open(OFFLINE_CACHE_NAME);
+    const existing = await cache.match('/offline/' + s.id);
+    if (!existing) await toggleOfflineSubject(s.id, s.name);
+  }
+  showToast('All subjects downloaded 🎉');
+}
+
+// ---------- SIMULATIONS ----------
+// Honest catalog: only Projectile Motion is actually built. Everything
+// else is listed with a "Coming soon" badge rather than faked as READY —
+// each of these is genuinely its own build (a real physics/chemistry
+// interactive), not a checkbox to tick in one pass.
+const SIMULATIONS_CATALOG = [
+  { key:'projectile', name:'Projectile Motion', icon:'🎯', category:'Physical Sciences', desc:'Launch angle, velocity and gravity — trace the trajectory.', ready:true },
+  { key:'circuits', name:'Series & Parallel Circuits', icon:'🔌', category:'Physical Sciences', desc:'Build a circuit and see how current behaves.', ready:false },
+  { key:'titration', name:'Acid-Base Titration', icon:'🧪', category:'Physical Sciences', desc:'Add NaOH drop by drop and watch the pH curve.', ready:false },
+  { key:'punnett', name:'Punnett Square Explorer', icon:'🧬', category:'Life Sciences', desc:'Cross two parent genotypes and see offspring ratios.', ready:false },
+  { key:'functions', name:'Function Transformer', icon:'📈', category:'Mathematics', desc:'Drag sliders to shift, stretch and reflect a graph.', ready:false },
+  { key:'circular_motion', name:'Circular Motion', icon:'🔄', category:'Physical Sciences', desc:'Sweep a ball around a circular path.', ready:false },
+];
+
+function renderSimulations() {
+  const body = document.getElementById('tool-detail-body');
+  const categories = ['All', ...new Set(SIMULATIONS_CATALOG.map(s => s.category))];
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🎯 Interactive Simulations</h2><div class="sub">Hands-on science &amp; maths interactives</div></div>
+    <div class="sim-filters" id="sim-filters">
+      ${categories.map((c,i) => `<button class="${i===0?'active':''}" onclick="simFilter('${c}', this)">${c}</button>`).join('')}
+    </div>
+    <div class="sim-grid" id="sim-grid"></div>
+  `;
+  simFilter('All');
+}
+
+function simFilter(category, btn) {
+  if (btn) { document.querySelectorAll('#sim-filters button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+  const items = category === 'All' ? SIMULATIONS_CATALOG : SIMULATIONS_CATALOG.filter(s => s.category === category);
+  document.getElementById('sim-grid').innerHTML = items.map(s => `
+    <div class="sim-card" onclick="${s.ready ? `openSimulation('${s.key}')` : `showToast('${escapeHtml(s.name)} is still being built')`}">
+      <div class="icon">${s.icon}</div>
+      <div class="name">${escapeHtml(s.name)}</div>
+      <div class="desc">${escapeHtml(s.desc)}</div>
+      <span class="sim-badge ${s.ready ? 'ready' : 'soon'}">${s.ready ? 'READY' : 'COMING SOON'}</span>
+    </div>
+  `).join('');
+}
+
+function openSimulation(key) {
+  if (key !== 'projectile') return;
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <button class="back-btn-pill" onclick="renderSimulations()">‹ All Simulations</button>
+    <div class="tool-detail-header"><h2>🎯 Projectile Motion</h2></div>
+    <div class="sim-canvas-wrap">
+      <canvas id="proj-canvas" width="320" height="240" style="width:100%;max-width:320px;background:var(--bg3);border-radius:8px"></canvas>
+      <div class="sim-slider-row">Angle <input type="range" id="proj-angle" min="10" max="80" value="45" oninput="projDraw()"> <b id="proj-angle-val">45°</b></div>
+      <div class="sim-slider-row">Velocity <input type="range" id="proj-velocity" min="5" max="50" value="25" oninput="projDraw()"> <b id="proj-velocity-val">25 m/s</b></div>
+      <div id="proj-stats" style="margin-top:10px;font-size:.82rem;color:var(--text2)"></div>
+    </div>
+  `;
+  projDraw();
+}
+
+function projDraw() {
+  const angleDeg = Number(document.getElementById('proj-angle').value);
+  const v0 = Number(document.getElementById('proj-velocity').value);
+  document.getElementById('proj-angle-val').textContent = angleDeg + '°';
+  document.getElementById('proj-velocity-val').textContent = v0 + ' m/s';
+
+  const g = 9.8;
+  const angleRad = angleDeg * Math.PI / 180;
+  const vx = v0 * Math.cos(angleRad), vy = v0 * Math.sin(angleRad);
+  const flightTime = (2 * vy) / g;
+  const range = vx * flightTime;
+  const maxHeight = (vy * vy) / (2 * g);
+
+  const canvas = document.getElementById('proj-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const padding = 20;
+  const scale = Math.min((canvas.width - padding*2) / range, (canvas.height - padding*2) / maxHeight) || 1;
+
+  ctx.strokeStyle = '#C1541C'; ctx.lineWidth = 2; ctx.beginPath();
+  for (let t = 0; t <= flightTime; t += flightTime/60) {
+    const x = vx * t, y = vy * t - 0.5 * g * t * t;
+    const cx = padding + x * scale, cy = canvas.height - padding - y * scale;
+    if (t === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+  }
+  ctx.stroke();
+  ctx.strokeStyle = '#999'; ctx.beginPath();
+  ctx.moveTo(padding, canvas.height - padding); ctx.lineTo(canvas.width - padding, canvas.height - padding); ctx.stroke();
+
+  document.getElementById('proj-stats').innerHTML =
+    `Range: <b>${range.toFixed(1)} m</b> · Max height: <b>${maxHeight.toFixed(1)} m</b> · Flight time: <b>${flightTime.toFixed(1)} s</b>`;
+}
+
+// ---------- FLASHCARDS ----------
+// Flashcards (spaced repetition) now live in afriace-quiz-ui.js
+
+// ---------- FORMULA SHEET ----------
+async function renderFormulaSheet() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>📐 Formula Sheet</h2></div>
+    <select id="fs-subject" onchange="fsLoad()">${STATE.subjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}</select>
+    <div id="fs-body" style="margin-top:12px"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>
+  `;
+  await fsLoad();
+}
+
+async function fsLoad() {
+  const subjectId = document.getElementById('fs-subject').value;
+  const el = document.getElementById('fs-body');
+  try {
+    const groups = await AfriAceData.getSubjectFormulas(subjectId);
+    if (!groups.length) { el.innerHTML = '<div class="empty-state"><div class="icon">📐</div><div class="title">No formulas yet</div><div class="sub">These come from each topic\'s study notes — check back once the subject bank is written.</div></div>'; return; }
+    el.innerHTML = groups.map(g => `
+      <div class="notes-block">
+        <h3>${escapeHtml(g.topic)}</h3>
+        <ul>${g.formulas.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Could not load formulas right now.</p>';
+  }
+}
+
+// ---------- STUDY PLANNER ----------
+function renderStudyPlanner() {
+  const body = document.getElementById('tool-detail-body');
+  const today = new Date();
+  const weekStart = new Date(today); weekStart.setDate(today.getDate() - today.getDay());
+  const days = Array.from({length:7}).map((_,i) => { const d = new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
+  STATE.plannerSelectedDate = today.toISOString().slice(0,10);
+
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🗓️ Study Planner</h2></div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;overflow-x:auto">
+      ${days.map(d => {
+        const iso = d.toISOString().slice(0,10);
+        const isToday = iso === STATE.plannerSelectedDate;
+        return `<div onclick="plannerSelectDate('${iso}', this)" style="flex:0 0 auto;text-align:center;padding:8px 12px;border-radius:10px;cursor:pointer;background:${isToday?'var(--primary)':'var(--bg2)'};color:${isToday?'#fff':'var(--text)'};border:1px solid var(--border)">
+          <div style="font-size:.65rem;font-weight:700">${d.toLocaleDateString(undefined,{weekday:'short'})}</div>
+          <div style="font-weight:800">${d.getDate()}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin-bottom:8px" id="planner-day-label">TODAY'S TASKS</div>
+    <div id="planner-tasks"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>
+    <div class="field-block" style="margin-top:14px">
+      <label>+ Add Task</label>
+      <input type="text" id="planner-title" placeholder="e.g. Study Chapter 3 Calculus">
+      <select id="planner-subject" style="margin-top:8px">${STATE.subjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}</select>
+      <button class="primary" style="width:100%;margin-top:8px" onclick="plannerAddTask()">Add</button>
+    </div>
+  `;
+  plannerLoadTasks();
+}
+
+function plannerSelectDate(iso, el) {
+  STATE.plannerSelectedDate = iso;
+  document.querySelectorAll('#tool-detail-body > div:nth-child(2) > div').forEach(d => { d.style.background='var(--bg2)'; d.style.color='var(--text)'; });
+  el.style.background = 'var(--primary)'; el.style.color = '#fff';
+  const isToday = iso === new Date().toISOString().slice(0,10);
+  document.getElementById('planner-day-label').textContent = isToday ? "TODAY'S TASKS" : new Date(iso).toDateString().toUpperCase() + ' TASKS';
+  plannerLoadTasks();
+}
+
+async function plannerLoadTasks() {
+  const el = document.getElementById('planner-tasks');
+  try {
+    const tasks = await AfriAceData.getTasks(STATE.profile.id, STATE.plannerSelectedDate);
+    if (!tasks.length) { el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">No tasks yet. Add your first study task!</p>'; return; }
+    el.innerHTML = tasks.map(t => `
+      <div class="profile-row" onclick="plannerToggleTask('${t.id}', ${!t.done})">
+        <div class="left" style="${t.done ? 'text-decoration:line-through;opacity:.5' : ''}">${escapeHtml(t.title)} ${t.subjects?.name ? '· ' + escapeHtml(t.subjects.name) : ''}</div>
+        <div class="right">${t.done ? '✅' : '⬜'}</div>
+      </div>
+    `).join('');
+  } catch (e) { el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Could not load tasks right now.</p>'; }
+}
+
+async function plannerAddTask() {
+  const title = document.getElementById('planner-title').value.trim();
+  const subjectId = document.getElementById('planner-subject').value;
+  if (!title) { showToast('Enter a task.'); return; }
+  try {
+    await AfriAceData.addTask(STATE.profile.id, { title, subjectId, dueDate: STATE.plannerSelectedDate });
+    document.getElementById('planner-title').value = '';
+    await plannerLoadTasks();
+  } catch (e) { showToast('Could not add that task right now.'); }
+}
+
+async function plannerToggleTask(id, done) {
+  try { await AfriAceData.toggleTask(id, done); await plannerLoadTasks(); } catch (e) { showToast('Could not update that task.'); }
+}
+
+// ---------- ARCADE HUB ----------
+function renderArcade() {
+  const body = document.getElementById('tool-detail-body');
+  const games = [
+    ['word_unscramble','🔤','Word Unscramble'], ['trivia_sprint','🧠','Trivia Sprint'],
+    ['speed_math','🔢','Speed Math'], ['memory_match','🧩','Memory Match'], ['class_duel','⚔️','Class Duel'],
+  ];
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🕹️ AfriAce Arcade</h2></div>
+    <div class="tool-grid">
+      ${games.map(([key,icon,name]) => `<div class="tool-card" onclick="openToolDetail(TOOLS_CATALOG.flatMap(c=>c.items).find(t=>t.key==='${key}'))"><span class="t-icon">${icon}</span><div class="t-name">${name}</div></div>`).join('')}
+    </div>
+  `;
+}
+
+// ---------- WORD UNSCRAMBLE (built from subject_notes.key_terms) ----------
+async function renderWordUnscramble() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `<div class="tool-detail-header"><h2>🔤 Word Unscramble</h2></div><div id="wu-body"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>`;
+  const terms = await gatherKeyTerms();
+  if (!terms.length) { document.getElementById('wu-body').innerHTML = '<p style="color:var(--text3);font-size:.85rem">No key terms yet — check back once the subject bank is written.</p>'; return; }
+  STATE.wuTerms = terms.sort(() => Math.random()-0.5).slice(0,10);
+  STATE.wuIndex = 0; STATE.wuScore = 0;
+  wuNext();
+}
+
+async function gatherKeyTerms() {
+  const all = [];
+  for (const s of STATE.subjects) {
+    try {
+      const topics = await AfriAceAcademic.getTopics(s.id);
+      for (const t of topics.slice(0,3)) {
+        const notes = await AfriAceAcademic.getSubjectNotes(t.id);
+        if (notes?.key_terms) all.push(...notes.key_terms);
+      }
+    } catch (e) { /* skip */ }
+  }
+  return [...new Set(all)];
+}
+
+function scramble(word) {
+  const letters = word.split('');
+  for (let i = letters.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [letters[i],letters[j]]=[letters[j],letters[i]]; }
+  return letters.join('') === word && word.length > 1 ? scramble(word) : letters;
+}
+
+function wuNext() {
+  const el = document.getElementById('wu-body');
+  const word = STATE.wuTerms[STATE.wuIndex];
+  if (!word) { el.innerHTML = `<div class="result-banner"><div class="big">${STATE.wuScore}</div><div>terms unscrambled</div></div>`; return; }
+  const letters = scramble(word.toUpperCase().replace(/\s/g,''));
+  el.innerHTML = `
+    <p style="text-align:center;color:var(--text3);font-size:.8rem">Word ${STATE.wuIndex+1} of ${STATE.wuTerms.length} · Score: ${STATE.wuScore}</p>
+    <div class="scramble-letters">${letters.map(l => `<span>${l}</span>`).join('')}</div>
+    <input type="text" id="wu-input" placeholder="Type the unscrambled word" style="width:100%;padding:12px;border-radius:10px;border:2px solid var(--border2);text-align:center;font-weight:700" onkeydown="if(event.key==='Enter')wuCheck('${escapeHtml(word)}')">
+    <button class="primary" style="width:100%;margin-top:10px" onclick="wuCheck('${escapeHtml(word)}')">Check</button>
+  `;
+}
+
+function wuCheck(word) {
+  const guess = document.getElementById('wu-input').value.trim().toLowerCase();
+  if (guess === word.toLowerCase()) { STATE.wuScore++; showToast('Correct! 🎉'); } else { showToast(`It was "${word}"`); }
+  STATE.wuIndex++;
+  wuNext();
+}
+
+// ---------- TRIVIA SPRINT ----------
+async function renderTriviaSprint() {
+  const body = document.getElementById('tool-detail-body');
+  if (!STATE.subjects.length) { body.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Pick your subjects first.</p>'; return; }
+  body.innerHTML = `<div class="tool-detail-header"><h2>🧠 Trivia Sprint</h2></div><div id="tv-body"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>`;
+  const all = [];
+  for (const s of STATE.subjects) { try { all.push(...await AfriAceAcademic.getQuestions(s.id, { limit: 10 })); } catch(e){} }
+  if (!all.length) { document.getElementById('tv-body').innerHTML = '<p style="color:var(--text3);font-size:.85rem">No questions yet for your subjects.</p>'; return; }
+  STATE.tvQuestions = all.sort(()=>Math.random()-0.5).slice(0,15);
+  STATE.tvIndex = 0; STATE.tvScore = 0; STATE.tvSeconds = 120;
+  clearInterval(STATE.tvTimer);
+  STATE.tvTimer = setInterval(() => { STATE.tvSeconds--; const s=document.getElementById('tv-timer'); if(s) s.textContent=STATE.tvSeconds; if (STATE.tvSeconds<=0) tvEnd(); }, 1000);
+  tvRender();
+}
+
+function tvRender() {
+  const el = document.getElementById('tv-body');
+  const q = STATE.tvQuestions[STATE.tvIndex];
+  if (!q) { tvEnd(); return; }
+  const options = Array.isArray(q.options) ? q.options : [];
+  el.innerHTML = `
+    <p style="text-align:center"><b id="tv-timer" style="font-family:'JetBrains Mono',monospace;color:var(--primary)">${STATE.tvSeconds}</b>s left · Score: ${STATE.tvScore}</p>
+    <div class="quiz-q"><div class="qtext">${escapeHtml(q.question_text)}</div>
+      ${options.map(o => `<button class="quiz-opt" onclick="tvAnswer('${o.key}','${q.correct_answer}')">${escapeHtml(o.key)}. ${escapeHtml(o.text)}</button>`).join('')}
+    </div>
+  `;
+}
+
+function tvAnswer(key, correct) {
+  if (key === correct) { STATE.tvScore += 2; }
+  STATE.tvIndex++;
+  tvRender();
+}
+
+function tvEnd() {
+  clearInterval(STATE.tvTimer);
+  document.getElementById('tv-body').innerHTML = `<div class="result-banner"><div class="big">${STATE.tvScore} XP</div><div>Trivia Sprint complete</div></div>`;
+}
+
+// ---------- SPEED MATH ----------
+function renderSpeedMath() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `<div class="tool-detail-header"><h2>🔢 Speed Math</h2></div><div id="sm-body"></div>`;
+  STATE.smScore = 0; STATE.smSeconds = 60;
+  clearInterval(STATE.smTimer);
+  STATE.smTimer = setInterval(() => { STATE.smSeconds--; const s=document.getElementById('sm-timer'); if(s) s.textContent=STATE.smSeconds; if (STATE.smSeconds<=0) smEnd(); }, 1000);
+  smNext();
+}
+
+function smNext() {
+  const a = Math.floor(Math.random()*12)+1, b = Math.floor(Math.random()*12)+1;
+  const ops = ['+','-','×']; const op = ops[Math.floor(Math.random()*ops.length)];
+  STATE.smAnswer = op==='+' ? a+b : op==='-' ? a-b : a*b;
+  document.getElementById('sm-body').innerHTML = `
+    <div class="arcade-hero">
+      <div class="big-timer" id="sm-timer">${STATE.smSeconds}</div>
+      <p style="color:var(--text2);font-size:.8rem">seconds left · Score: ${STATE.smScore}</p>
+      <div style="font-size:1.8rem;font-weight:800;margin:16px 0">${a} ${op} ${b} = ?</div>
+      <input type="number" id="sm-input" style="width:100%;padding:14px;font-size:1.2rem;text-align:center;border-radius:10px;border:2px solid var(--border2)" onkeydown="if(event.key==='Enter')smCheck()" autofocus>
+      <button class="primary" style="width:100%;margin-top:10px" onclick="smCheck()">Submit</button>
+    </div>
+  `;
+  document.getElementById('sm-input')?.focus();
+}
+
+function smCheck() {
+  const val = Number(document.getElementById('sm-input').value);
+  if (val === STATE.smAnswer) STATE.smScore++;
+  smNext();
+}
+
+function smEnd() {
+  clearInterval(STATE.smTimer);
+  document.getElementById('sm-body').innerHTML = `<div class="result-banner"><div class="big">${STATE.smScore}</div><div>correct answers</div></div>`;
+}
+
+// ---------- MEMORY MATCH ----------
+async function renderMemoryMatch() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `<div class="tool-detail-header"><h2>🧩 Memory Match</h2></div><div id="mm-body"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>`;
+  const terms = (await gatherKeyTerms()).slice(0,8);
+  if (terms.length < 4) { document.getElementById('mm-body').innerHTML = '<p style="color:var(--text3);font-size:.85rem">Need more key terms — check back once the subject bank is written.</p>'; return; }
+  const pairs = [...terms, ...terms].map((t,i) => ({ id:i, term:t, revealed:false, matched:false })).sort(()=>Math.random()-0.5);
+  STATE.mmCards = pairs; STATE.mmSelected = [];
+  mmRender();
+}
+
+function mmRender() {
+  document.getElementById('mm-body').innerHTML = `
+    <div class="memory-grid">
+      ${STATE.mmCards.map(c => `<div class="memory-card ${c.matched?'matched':c.revealed?'revealed':''}" onclick="mmFlip(${c.id})">${(c.revealed||c.matched) ? escapeHtml(c.term) : '?'}</div>`).join('')}
+    </div>
+  `;
+}
+
+function mmFlip(id) {
+  const card = STATE.mmCards.find(c => c.id === id);
+  if (!card || card.matched || card.revealed || STATE.mmSelected.length >= 2) return;
+  card.revealed = true;
+  STATE.mmSelected.push(card);
+  mmRender();
+  if (STATE.mmSelected.length === 2) {
+    const [a,b] = STATE.mmSelected;
+    setTimeout(() => {
+      if (a.term === b.term) { a.matched = b.matched = true; }
+      else { a.revealed = b.revealed = false; }
+      STATE.mmSelected = [];
+      mmRender();
+      if (STATE.mmCards.every(c => c.matched)) showToast('All matched! 🎉');
+    }, 700);
+  }
+}
+
+// ---------- CLASS DUEL (async, not live — see honest note in UI) ----------
+async function renderClassDuel() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>⚔️ Class Duel</h2></div>
+    <div class="tool-intro-card">This is an async duel — you and your opponent each answer 5 questions independently, then compare scores. Real-time head-to-head is a bigger build for a later pass.</div>
+    <button class="primary" style="width:100%" onclick="startDuel()">Start a duel (5 questions)</button>
+    <div id="duel-history" style="margin-top:14px"></div>
+  `;
+  try {
+    const duels = await AfriAceData.getMyDuels(STATE.profile.id);
+    document.getElementById('duel-history').innerHTML = duels.length ? duels.map(d => `
+      <div class="subject-card"><div class="icon">⚔️</div><div style="flex:1"><div class="name">${escapeHtml(d.subjects?.name||'')}</div><div class="meta">${d.status}</div></div>
+      <div style="font-weight:800">${d.score_json?.challenger ?? '—'}</div></div>
+    `).join('') : '';
+  } catch (e) {}
+}
+
+async function startDuel() {
+  if (!STATE.subjects.length) { showToast('Pick your subjects first.'); return; }
+  const subject = STATE.subjects[0];
+  try {
+    const duel = await AfriAceData.createDuel(STATE.myClassId, subject.id, STATE.profile.id);
+    const questions = await AfriAceAcademic.getQuestions(subject.id, { limit: 5 });
+    STATE.duelQuestions = questions; STATE.duelIndex = 0; STATE.duelScore = 0; STATE.duelId = duel.id;
+    duelRender();
+  } catch (e) { showToast('Could not start a duel right now — are you in a class?'); }
+}
+
+function duelRender() {
+  const body = document.getElementById('tool-detail-body');
+  const q = STATE.duelQuestions[STATE.duelIndex];
+  if (!q) {
+    AfriAceData.submitDuelScore(STATE.duelId, STATE.profile.id, STATE.duelScore, true).catch(()=>{});
+    body.innerHTML = `<div class="result-banner"><div class="big">${STATE.duelScore}/${STATE.duelQuestions.length}</div><div>Waiting for your opponent to finish their side</div></div>`;
+    return;
+  }
+  const options = Array.isArray(q.options) ? q.options : [];
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>⚔️ Class Duel — Q${STATE.duelIndex+1}/${STATE.duelQuestions.length}</h2></div>
+    <div class="quiz-q"><div class="qtext">${escapeHtml(q.question_text)}</div>
+      ${options.map(o => `<button class="quiz-opt" onclick="duelAnswer('${o.key}','${q.correct_answer}')">${escapeHtml(o.key)}. ${escapeHtml(o.text)}</button>`).join('')}
+    </div>
+  `;
+}
+
+function duelAnswer(key, correct) {
+  if (key === correct) STATE.duelScore++;
+  STATE.duelIndex++;
+  duelRender();
+}
+
+// ---------- LIVE CLASS QUIZ (student join side) ----------
+function renderLiveQuiz() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>⚡ Live Class Quiz</h2></div>
+    <div class="tool-intro-card">Enter the code your teacher shared to join their live session. (Hosting a session requires a teacher portal that isn't built yet, so this can't be tested end-to-end until then.)</div>
+    <div class="field-block">
+      <label>Join code</label>
+      <input type="text" id="lq-code" placeholder="e.g. AB12CD" style="text-transform:uppercase">
+      <button class="primary" style="width:100%;margin-top:8px" onclick="joinLiveQuizHandler()">👋 Join a Quiz</button>
+    </div>
+    <div id="lq-status"></div>
+  `;
+}
+
+async function joinLiveQuizHandler() {
+  const code = document.getElementById('lq-code').value.trim();
+  if (!code) return;
+  try {
+    const session = await AfriAceData.joinLiveQuizByCode(STATE.profile.id, code);
+    document.getElementById('lq-status').innerHTML = `<p style="color:var(--green);font-weight:700">Joined! Waiting for your teacher to start…</p>`;
+    AfriAceData.subscribeToLiveQuiz(session.id, () => {
+      showToast('Live quiz updated — refresh to see the latest question.');
+    });
+  } catch (e) {
+    document.getElementById('lq-status').innerHTML = `<p style="color:var(--red)">${escapeHtml(e.message || 'Could not join.')}</p>`;
+  }
+}
+
+// ---------- AUDIO SUMMARIES (TTS over real topic notes, not pre-recorded audio) ----------
+async function renderAudioSummaries() {
+  const body = document.getElementById('tool-detail-body');
+  body.innerHTML = `
+    <div class="tool-detail-header"><h2>🎧 Audio Summaries</h2><div class="sub">Your topic notes, read aloud — commute mode</div></div>
+    <div class="audio-player">
+      <div class="title" id="audio-now-title">Select a topic below</div>
+      <div class="audio-controls">
+        <button onclick="audioPause()">⏸</button>
+        <button onclick="audioResume()">▶</button>
+      </div>
+      <div class="speed-row">
+        ${[0.75,1,1.25,1.5].map(r => `<button class="${r===1?'active':''}" onclick="audioSetRate(${r},this)">${r}x</button>`).join('')}
+      </div>
+    </div>
+    <div id="audio-list"><p style="color:var(--text3);font-size:.85rem">Loading…</p></div>
+  `;
+  STATE.audioRate = 1;
+  const el = document.getElementById('audio-list');
+  const items = [];
+  for (const s of STATE.subjects) {
+    try {
+      const topics = await AfriAceAcademic.getTopics(s.id);
+      for (const t of topics) items.push({ subject: s.name, topic: t });
+    } catch (e) {}
+  }
+  if (!items.length) { el.innerHTML = '<p style="color:var(--text3);font-size:.85rem">No topics yet.</p>'; return; }
+  el.innerHTML = items.map((it,i) => `
+    <div class="subject-card" onclick="audioPlayTopic('${it.topic.id}', '${escapeHtml(it.topic.title)}')">
+      <div class="icon">🎧</div>
+      <div style="flex:1"><div class="name">${escapeHtml(it.topic.title)}</div><div class="meta">${escapeHtml(it.subject)}</div></div>
+      <button style="background:var(--primary);color:#fff;border:none;border-radius:50%;width:34px;height:34px">▶</button>
+    </div>
+  `).join('');
+}
+
+async function audioPlayTopic(topicId, title) {
+  const notes = await AfriAceAcademic.getSubjectNotes(topicId);
+  const text = [notes?.content, stripHtml(notes?.explanation), (notes?.points||[]).join('. ')].filter(Boolean).join('. ');
+  if (!text) { showToast('No notes written for this topic yet.'); return; }
+  document.getElementById('audio-now-title').textContent = title;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = STATE.audioRate || 1;
+  window.speechSynthesis.speak(utter);
+}
+
+function audioPause() { window.speechSynthesis.pause(); }
+function audioResume() { window.speechSynthesis.resume(); }
+function audioSetRate(rate, btn) {
+  STATE.audioRate = rate;
+  document.querySelectorAll('.speed-row button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function renderRecentActivity(sessions) {
+  const el = document.getElementById('home-recent-activity');
+  if (!sessions?.length) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem;">No practice sessions yet — start a quiz to see your activity here.</p>';
+    return;
+  }
+  el.innerHTML = sessions.map(s => `
+    <div class="subject-card">
+      <div class="icon">📊</div>
+      <div style="flex:1"><div class="name">${escapeHtml(s.subjects?.name || 'Practice')} ${escapeHtml(s.session_type || '')}</div>
+      <div class="meta">${new Date(s.started_at).toLocaleDateString()}</div></div>
+      <div style="font-weight:800;color:${(s.score / (s.total || 1)) >= 0.6 ? 'var(--green)' : 'var(--red)'}">${s.score ?? '—'}/${s.total ?? '—'}</div>
+    </div>
+  `).join('');
+}
+
+function renderHeader() {
+  const initials = (STATE.profile?.full_name || '?').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+  document.getElementById('th-avatar').textContent = initials || '?';
+  document.getElementById('th-streak').textContent = '🔥 ' + (STATE.streak?.current_streak ?? 0);
+  document.getElementById('th-exam').textContent = STATE.academicProfile?.examinations?.code || '—';
+}
+
+// ---------- ONBOARDING WIZARD ----------
+async function openWizard() {
+  STATE.wizard = { step: 1, levels: [], levelId: null, subjectIds: [], dailyGoal: 20 };
+  if (STATE.schoolConfig?.education_system_id) {
+    STATE.wizard.levels = await AfriAceAcademic.getLevels(STATE.schoolConfig.education_system_id);
+  }
+  document.getElementById('wizard-overlay').classList.add('active');
+  renderWizardStep();
+}
+
+function closeWizard() {
+  document.getElementById('wizard-overlay').classList.remove('active');
+}
+
+function updateWizardDots() {
+  [1,2,3].forEach(n => document.getElementById('wiz-dot-' + n).classList.toggle('done', n <= STATE.wizard.step));
+}
+
+function renderWizardStep() {
+  updateWizardDots();
+  const el = document.getElementById('wizard-step-content');
+  if (STATE.wizard.step === 1) {
+    el.innerHTML = `
+      <div style="font-size:2rem;text-align:center">🎓</div>
+      <h2>Welcome to AfriAce!</h2>
+      <div class="sub">Let's set you up in 30 seconds so the app feels personal from day one.</div>
+      <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text2);margin-bottom:8px">What level are you in?</label>
+      <div class="wizard-grid" id="wiz-level-grid">
+        ${STATE.wizard.levels.map(l => `<div class="wizard-option" data-id="${l.id}" onclick="selectWizardLevel('${l.id}')">${escapeHtml(l.name)}</div>`).join('') || '<p style="color:var(--text3);font-size:.85rem">No levels configured for your school yet — contact your school admin.</p>'}
+      </div>
+      <div class="wizard-actions"><button class="next-btn" id="wiz-next-1" disabled onclick="wizardNext()">Continue →</button></div>
+    `;
+  } else if (STATE.wizard.step === 2) {
+    el.innerHTML = `
+      <div style="font-size:2rem;text-align:center">📚</div>
+      <h2>Your subjects</h2>
+      <div class="sub">Pick the subjects you're taking this year</div>
+      <div class="wizard-grid" id="wiz-subject-grid">
+        ${STATE.subjects.map(s => `<div class="wizard-option${STATE.wizard.subjectIds.includes(s.id) ? ' selected' : ''}" data-id="${s.id}" onclick="toggleWizardSubject('${s.id}')">${s.icon || '📘'} ${escapeHtml(s.name)}</div>`).join('') || '<p style="color:var(--text3);font-size:.85rem">No subjects configured for your school yet.</p>'}
+      </div>
+      <p style="text-align:center;font-size:.78rem;color:var(--text3);margin:-8px 0 14px" id="wiz-subject-count">0 subjects selected</p>
+      <div class="wizard-actions">
+        <button class="back-btn" onclick="wizardBack()">← Back</button>
+        <button class="next-btn" onclick="wizardNext()">Continue →</button>
+      </div>
+    `;
+    updateWizardSubjectCount();
+  } else if (STATE.wizard.step === 3) {
+    const opts = [
+      { n: 10, label: 'Chill', emoji: '😌' },
+      { n: 20, label: 'Solid', emoji: '💪' },
+      { n: 30, label: 'Serious', emoji: '🔥' },
+      { n: 50, label: 'Beast Mode', emoji: '🚀' },
+    ];
+    el.innerHTML = `
+      <div style="font-size:2rem;text-align:center">🎯</div>
+      <h2>Set your daily goal</h2>
+      <div class="sub">How many questions do you want to answer each day?</div>
+      <div class="wizard-grid">
+        ${opts.map(o => `
+          <div class="wizard-option${STATE.wizard.dailyGoal === o.n ? ' selected' : ''}" onclick="selectWizardGoal(${o.n})">
+            ${o.n} Qs<div class="desc">${o.label} ${o.emoji}</div>
+          </div>`).join('')}
+      </div>
+      <div class="wizard-actions">
+        <button class="back-btn" onclick="wizardBack()">← Back</button>
+        <button class="next-btn" onclick="finishWizard()">🚀 Start Learning!</button>
+      </div>
+    `;
+  }
+}
+
+function selectWizardLevel(levelId) {
+  STATE.wizard.levelId = levelId;
+  document.querySelectorAll('#wiz-level-grid .wizard-option').forEach(o => o.classList.toggle('selected', o.dataset.id === levelId));
+  document.getElementById('wiz-next-1').disabled = false;
+}
+
+function toggleWizardSubject(subjectId) {
+  const idx = STATE.wizard.subjectIds.indexOf(subjectId);
+  if (idx === -1) STATE.wizard.subjectIds.push(subjectId); else STATE.wizard.subjectIds.splice(idx, 1);
+  document.querySelector(`#wiz-subject-grid [data-id="${subjectId}"]`).classList.toggle('selected');
+  updateWizardSubjectCount();
+}
+
+function updateWizardSubjectCount() {
+  const el = document.getElementById('wiz-subject-count');
+  if (el) el.textContent = `${STATE.wizard.subjectIds.length} subject${STATE.wizard.subjectIds.length === 1 ? '' : 's'} selected`;
+}
+
+function selectWizardGoal(n) {
+  STATE.wizard.dailyGoal = n;
+  renderWizardStep();
+}
+
+async function wizardNext() {
+  if (STATE.wizard.step === 1) {
+    // Now that a level is chosen, load subjects for the school's resolved syllabus version.
+    if (!STATE.subjects.length && STATE.schoolConfig) {
+      try {
+        const version = await AfriAceAcademic.resolveDefaultSyllabusVersion(STATE.schoolConfig);
+        if (version) {
+          STATE.academicProfile = STATE.academicProfile || {};
+          STATE.academicProfile.syllabus_version_id = version.id;
+          STATE.subjects = await AfriAceAcademic.getSubjects(version.id);
+        }
+      } catch (e) { console.warn(e); }
+    }
+  }
+  STATE.wizard.step++;
+  renderWizardStep();
+}
+
+function wizardBack() {
+  STATE.wizard.step--;
+  renderWizardStep();
+}
+
+async function finishWizard() {
+  try {
+    const sc = STATE.schoolConfig || {};
+    await AfriAceAcademic.saveStudentOnboarding(STATE.profile.id, {
+      countryId: sc.country_id || null,
+      educationSystemId: sc.education_system_id || null,
+      examinationId: sc.examination_id || null,
+      syllabusVersionId: STATE.academicProfile?.syllabus_version_id || null,
+      levelId: STATE.wizard.levelId,
+      subjectIds: STATE.wizard.subjectIds,
+      dailyGoalQuestions: STATE.wizard.dailyGoal,
+    });
+    STATE.academicProfile = await AfriAceAcademic.getStudentProfile(STATE.profile.id);
+    closeWizard();
+    await loadHomeData();
+    showToast('You\'re all set 🎉');
+  } catch (e) {
+    showToast('Could not save your setup: ' + (e.message || 'try again'));
+  }
+}
+
+// ---------- HOME ----------
+const SUBJECT_GRADIENTS = [
+  'linear-gradient(135deg,#1E7A52,#2FA372)', 'linear-gradient(135deg,#5B4FC4,#8477E0)',
+  'linear-gradient(135deg,#C1541C,#E07A3F)', 'linear-gradient(135deg,#17332D,#2C5C50)',
+  'linear-gradient(135deg,#B8862E,#D6A93B)', 'linear-gradient(135deg,#B91C1C,#DB5555)',
+];
+
+async function renderHomeSubjects() {
+  const el = document.getElementById('home-subjects-list');
+  if (!STATE.subjects.length) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem;">No subjects configured for your academic profile yet.</p>';
+    return;
+  }
+  const shown = STATE.subjects.slice(0, 4);
+  let mastery = {};
+  try { mastery = await AfriAceData.getSubjectMastery(STATE.profile.id, shown.map(s => s.id)); } catch (e) { /* leave at 0 */ }
+
+  el.innerHTML = shown.map((s, i) => `
+    <div class="sg-card" style="background:${SUBJECT_GRADIENTS[i % SUBJECT_GRADIENTS.length]}" onclick="openSubject('${s.id}')">
+      <div class="sg-icon">${s.icon || '📘'}</div>
+      <div>
+        <div class="sg-name">${escapeHtml(s.name)}</div>
+        <div class="sg-bar"><div class="sg-bar-fill" style="width:${mastery[s.id] || 0}%"></div></div>
+        <div class="sg-pct">${mastery[s.id] || 0}% mastery</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---------- SUBJECTS ----------
+function renderSubjectsList() {
+  if (window.qzRenderExamChips) qzRenderExamChips('subjects-exam-chips');
+  const el = document.getElementById('subjects-list');
+  if (!STATE.subjects.length) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem;">No subjects configured yet.</p>';
+    return;
+  }
+  el.innerHTML = STATE.subjects.map(s => `
+    <div class="subject-card" onclick="openSubject('${s.id}')">
+      <div class="icon">${s.icon || '📘'}</div>
+      <div><div class="name">${escapeHtml(s.name)}</div></div>
+    </div>
+  `).join('');
+}
+
+async function openSubject(subjectId) {
+  const subject = STATE.subjects.find(s => s.id === subjectId);
+  STATE.currentSubject = subject;
+  document.getElementById('syllabus-subject-title').textContent = subject.name;
+  document.getElementById('syllabus-notes-area').style.display = 'none';
+  document.getElementById('syllabus-topics-list').style.display = 'block';
+  navTo(document.querySelectorAll('.nav-item')[1], 'syllabus');
+  STATE.currentTopics = await AfriAceLearning.db.getTopics(
+    subjectId, STATE.academicProfile?.level_id || null
+  );
+  renderTopicsList();
+}
+
+function renderTopicsList() {
+  document.getElementById('syllabus-notes-area').style.display = 'none';
+  document.getElementById('syllabus-topics-list').style.display = 'block';
+  const el = document.getElementById('syllabus-topics-list');
+  if (!STATE.currentTopics.length) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:.85rem;">No topics have been added for this subject yet.</p>';
+    return;
+  }
+
+  // Group by unit_label (e.g. "Term 1") while preserving arrival order —
+  // topics already come pre-sorted by unit_sort_order/sort_order from the client.
+  const groups = [];
+  for (const t of STATE.currentTopics) {
+    const label = t.unit_label || 'Topics';
+    let group = groups.find(g => g.label === label);
+    if (!group) { group = { label, topics: [] }; groups.push(group); }
+    group.topics.push(t);
+  }
+
+  const diffPill = d => d ? `<span class="diff-pill diff-${d}">${d[0].toUpperCase() + d.slice(1)}</span>` : '';
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+      <button class="primary" style="padding:8px 16px;font-size:.82rem" onclick="startQuiz('${STATE.currentSubject.id}')">⚡ Quiz</button>
+    </div>
+    ${groups.map(g => `
+      <div class="term-header">
+        <div class="dot-label"><span class="dot"></span>${escapeHtml(g.label.toUpperCase())}</div>
+        <div class="count">${g.topics.length} topic${g.topics.length === 1 ? '' : 's'}</div>
+      </div>
+      ${g.topics.map(t => `
+        <div class="topic-item" onclick="openTopic('${t.id}')">
+          <div class="topic-num">${escapeHtml(t.topic_number || '')}</div>
+          <div style="flex:1"><span>${escapeHtml(t.title)}</span>${diffPill(t.difficulty)}</div>
+          <span style="color:var(--text3)">›</span>
+        </div>
+      `).join('')}
+    `).join('')}
+  `;
+}
+
+async function openTopic(topicId) {
+  document.getElementById('syllabus-topics-list').style.display = 'none';
+  document.getElementById('syllabus-notes-area').style.display = 'block';
+  STATE.currentTopicId = topicId;
+  const contentEl = document.getElementById('syllabus-notes-content');
+  contentEl.innerHTML = '<p style="color:var(--text3);font-size:.85rem;">Loading…</p>';
+  const notes = await AfriAceAcademic.getSubjectNotes(topicId);
+  const topic = STATE.currentTopics.find(t => t.id === topicId);
+
+  const askAceCard = `
+    <div class="ask-ace-card">
+      <div class="icon">🤖</div>
+      <div class="txt"><b>Explain this with Ace</b><div>Your AI study tutor — ask anything about this topic</div></div>
+      <button onclick="askAceAboutTopic('${topicId}')">Ask Ace ▸</button>
+    </div>
+  `;
+
+  const practiceRow = `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px">
+      <button class="guest-btn" onclick="qzPracticeTopic('${STATE.currentSubject.id}', '${topicId}')">🎯 Practise this topic</button>
+      <button class="guest-btn" onclick="openTool('flashcards')">🗂️ Flashcards</button>
+    </div>`;
+
+  if (!notes) {
+    contentEl.innerHTML = askAceCard + practiceRow + '<p style="color:var(--text3);font-size:.85rem;">Notes for this topic haven\'t been written yet — try asking Ace above.</p>';
+    return;
+  }
+
+  const unverifiedBadge = notes.is_verified
+    ? ''
+    : '<div class="badge-unverified">Drafted by AI — not yet checked against the official syllabus</div>';
+
+  const plainText = [notes.content, stripHtml(notes.explanation), (notes.points||[]).join('. ')].filter(Boolean).join('. ');
+  const listenBtn = STATE.textToSpeechOn
+    ? `<button class="guest-btn" style="margin-bottom:12px" onclick="readAloud(${JSON.stringify(plainText)})">🔊 Listen to this topic</button>`
+    : '';
+
+  contentEl.innerHTML = `
+    ${askAceCard}
+    ${practiceRow}
+    ${listenBtn}
+    <div class="notes-block">
+      ${unverifiedBadge}
+      ${notes.content ? `<h3>📚 OVERVIEW</h3><p>${escapeHtml(notes.content)}</p>` : ''}
+      ${notes.key_terms?.length ? `<h3 style="margin-top:16px">🔑 KEY TERMS YOU MUST KNOW</h3><div style="margin-top:6px">${notes.key_terms.map(k => `<span class="key-term-pill">${escapeHtml(k)}</span>`).join('')}</div>` : ''}
+      ${notes.explanation ? `<h3 style="margin-top:16px">🔍 DETAILED EXPLANATION</h3><div style="margin-top:6px;line-height:1.6">${notes.explanation}</div>` : ''}
+      ${notes.points?.length ? `<h3 style="margin-top:16px">✅ EVERYTHING YOU NEED TO KNOW</h3><ul>${notes.points.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ul>` : ''}
+      ${renderListBlock('⚠️ Common mistakes', notes.common_mistakes)}
+      ${renderListBlock('🎯 Exam tips', notes.exam_tips)}
+      ${notes.worked_example ? `<h3 style="margin-top:16px">Worked example</h3><p>${escapeHtml(notes.worked_example)}</p>` : ''}
+    </div>
+  `;
+}
+
+function askAceAboutTopic(topicId) {
+  const topic = STATE.currentTopics.find(t => t.id === topicId);
+  const aiBuddyTool = TOOLS_CATALOG.flatMap(c => c.items).find(t => t.key === 'ai_buddy');
+  openAiChat(aiBuddyTool);
+  document.getElementById('chat-input').value = `Explain ${topic?.title || 'this topic'} to me`;
+}
+
+function renderListBlock(title, items) {
+  if (!items || !items.length) return '';
+  return `<h3 style="margin-top:14px">${title}</h3><ul>${items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
+}
+
+// ---------- QUIZ ----------
+// Quiz, timed quiz, mock exam, theory self-marking and review: see afriace-quiz-ui.js
+
+// ---------- PROFILE ----------
+async function renderProfile() {
+  const el = document.getElementById('profile-info');
+  const p = STATE.profile;
+  const a = STATE.academicProfile;
+  const initials = (p?.full_name || '?').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+  const stats = STATE.homeStats || { questionsDone: 0, avgScorePct: null };
+
+  el.innerHTML = `
+    <div style="text-align:center;margin-bottom:14px">
+      <div class="th-avatar" style="width:64px;height:64px;font-size:1.3rem;margin:0 auto 8px">${initials}</div>
+      <div style="font-weight:800;font-size:1.1rem">${escapeHtml(p?.full_name || '—')}</div>
+      <div style="color:var(--text2);font-size:.82rem">${escapeHtml(a?.levels?.name || 'No level set')} · ${escapeHtml(p?.email || '')}</div>
+    </div>
+    <div class="profile-stats-row">
+      <div><div class="num">${stats.questionsDone}</div><div class="lbl">Questions</div></div>
+      <div><div class="num">${stats.avgScorePct != null ? stats.avgScorePct + '%' : '—'}</div><div class="lbl">Avg Score</div></div>
+      <div><div class="num">${STATE.streak?.current_streak ?? 0}</div><div class="lbl">Day Streak</div></div>
+      <div><div class="num">${STATE.xp?.total_xp ?? 0}</div><div class="lbl">Points</div></div>
+    </div>
+
+    <div class="profile-row" style="cursor:default">
+      <div class="left">🧠 Spaced repetition</div>
+      <div class="right" style="font-size:.78rem">Flashcards aren't set up yet</div>
+    </div>
+
+    <button class="primary" style="width:100%;margin:12px 0 16px;background:var(--red)" onclick="handleSignOut()">🚪 Log out</button>
+
+    <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin:14px 0 8px">PERSONALISATION</div>
+    <div class="profile-row" onclick="openWizard()"><div class="left">🎓 Level</div><div class="right">${escapeHtml(a?.levels?.name || 'Set up')} ›</div></div>
+    <div class="profile-row" onclick="openWizard()"><div class="left">📚 Selected subjects</div><div class="right">${a?.subject_ids?.length || '—'} ›</div></div>
+    <div class="profile-row" onclick="openWizard()"><div class="left">🎯 Daily goal</div><div class="right">${a?.daily_goal_questions || 10} questions ›</div></div>
+    <div class="profile-row" onclick="toggleDarkMode()">
+      <div class="left">🌙 Dark theme</div>
+      <div class="toggle-switch" id="toggle-dark_mode"><div class="knob"></div></div>
+    </div>
+    <div class="profile-row" onclick="handleChangePassword()"><div class="left">🔒 Change password</div><div class="right">›</div></div>
+    <div class="profile-row" style="cursor:default"><div class="left">🌐 Language</div><div class="right">English</div></div>
+
+    <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin:18px 0 8px">NOTIFICATIONS</div>
+    <div class="profile-row" onclick="toggleReminder('daily_reminder')">
+      <div class="left">⏰ Daily study reminder</div>
+      <div class="toggle-switch" id="toggle-daily_reminder"><div class="knob"></div></div>
+    </div>
+    <div class="profile-row" onclick="toggleReminder('streak_alert')">
+      <div class="left">🔥 Streak at risk alert</div>
+      <div class="toggle-switch" id="toggle-streak_alert"><div class="knob"></div></div>
+    </div>
+    <div class="profile-row" onclick="toggleReminder('weekly_progress_report')">
+      <div class="left">📊 Weekly progress report</div>
+      <div class="toggle-switch" id="toggle-weekly_progress_report"><div class="knob"></div></div>
+    </div>
+
+    <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin:18px 0 8px">HELP</div>
+    <div class="profile-row" onclick="openWizard()"><div class="left">🧭 Take the setup steps again</div><div class="right">›</div></div>
+
+    <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin:18px 0 8px">ACCESSIBILITY</div>
+    <div class="profile-row" onclick="toggleAccessibility('high_contrast')">
+      <div class="left">👁️ High contrast mode</div>
+      <div class="toggle-switch" id="toggle-high_contrast"><div class="knob"></div></div>
+    </div>
+    <div class="profile-row" onclick="toggleAccessibility('dyslexia_font')">
+      <div class="left">📖 Dyslexia-friendly font</div>
+      <div class="toggle-switch" id="toggle-dyslexia_font"><div class="knob"></div></div>
+    </div>
+    <div class="profile-row" onclick="toggleAccessibility('text_to_speech')">
+      <div class="left">🗣️ Text-to-speech</div>
+      <div class="toggle-switch" id="toggle-text_to_speech"><div class="knob"></div></div>
+    </div>
+
+    <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin:18px 0 8px">DATA &amp; PRIVACY</div>
+    <div class="profile-row" onclick="showToast('Privacy policy page is a follow-up pass')"><div class="left">🛡️ Privacy Policy</div><div class="right">›</div></div>
+    <div class="profile-row" onclick="showToast('Terms of Service page is a follow-up pass')"><div class="left">📋 Terms of Service</div><div class="right">›</div></div>
+    <div class="profile-row" onclick="handleDeleteData()"><div class="left" style="color:var(--red)">🗑️ Delete my data</div><div class="right">›</div></div>
+
+    <div style="font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:.4px;margin:18px 0 8px">ABOUT</div>
+    <div class="profile-row" style="cursor:default"><div class="left">📱 Version</div><div class="right">v0.1 (build 1)</div></div>
+    <div class="profile-row" onclick="showToast('Thanks! Rating is a follow-up pass')"><div class="left">⭐ Rate AfriAce</div><div class="right">›</div></div>
+    <div class="profile-row" onclick="showToast('Sharing is a follow-up pass')"><div class="left">📤 Share AfriAce</div><div class="right">›</div></div>
+    <div class="profile-row" onclick="showToast('Disclaimer page is a follow-up pass')"><div class="left">ℹ️ Disclaimer</div><div class="right">›</div></div>
+    <button class="guest-btn" style="width:100%;margin-top:14px" onclick="showToast('Offline downloads are a follow-up pass')">📥 Offline Downloads</button>
+  `;
+
+  document.getElementById('toggle-dark_mode').classList.toggle('on', document.documentElement.classList.contains('theme-dark'));
+  document.getElementById('toggle-high_contrast').classList.toggle('on', document.documentElement.classList.contains('high-contrast'));
+  document.getElementById('toggle-dyslexia_font').classList.toggle('on', document.documentElement.classList.contains('dyslexia-font'));
+  document.getElementById('toggle-text_to_speech').classList.toggle('on', !!STATE.textToSpeechOn);
+
+  try {
+    const prefs = await AfriAceData.getReminderPrefs(p.id);
+    STATE.reminderPrefs = prefs || { daily_reminder: true, streak_alert: true, weekly_progress_report: false };
+    document.getElementById('toggle-daily_reminder').classList.toggle('on', STATE.reminderPrefs.daily_reminder !== false);
+    document.getElementById('toggle-streak_alert').classList.toggle('on', STATE.reminderPrefs.streak_alert !== false);
+    document.getElementById('toggle-weekly_progress_report').classList.toggle('on', STATE.reminderPrefs.weekly_progress_report === true);
+  } catch (e) { /* reminder_prefs row may not exist yet — toggles just default off until first toggle */ }
+}
+
+async function toggleReminder(key) {
+  const current = STATE.reminderPrefs || {};
+  const next = {
+    daily_reminder: current.daily_reminder !== false,
+    streak_alert: current.streak_alert !== false,
+    weekly_progress_report: current.weekly_progress_report === true,
+    [key]: key === 'weekly_progress_report' ? !(current[key] === true) : !(current[key] !== false),
+  };
+  STATE.reminderPrefs = next;
+  document.getElementById('toggle-' + key).classList.toggle('on');
+  try {
+    await AfriAceData.setReminderPrefs(STATE.profile.id, next);
+  } catch (e) {
+    showToast('Could not save that preference right now — has migration 008 been run?');
+  }
+}
+
+// ---------- ACCESSIBILITY (real, client-side — no backend needed) ----------
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('theme-dark');
+  document.getElementById('toggle-dark_mode').classList.toggle('on');
+}
+
+function toggleAccessibility(kind) {
+  if (kind === 'high_contrast') {
+    document.documentElement.classList.toggle('high-contrast');
+    document.getElementById('toggle-high_contrast').classList.toggle('on');
+  } else if (kind === 'dyslexia_font') {
+    document.documentElement.classList.toggle('dyslexia-font');
+    document.getElementById('toggle-dyslexia_font').classList.toggle('on');
+  } else if (kind === 'text_to_speech') {
+    STATE.textToSpeechOn = !STATE.textToSpeechOn;
+    document.getElementById('toggle-text_to_speech').classList.toggle('on');
+    showToast(STATE.textToSpeechOn ? 'A 🔊 Listen button will appear on topic pages' : 'Text-to-speech turned off');
+  }
+}
+
+function readAloud(text) {
+  if (!('speechSynthesis' in window)) { showToast('Text-to-speech isn\'t supported in this browser.'); return; }
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+}
+
+// ---------- PASSWORD / DATA ----------
+async function handleChangePassword() {
+  const newPassword = prompt('Enter a new password (min 6 characters):');
+  if (!newPassword) return;
+  if (newPassword.length < 6) { showToast('Password must be at least 6 characters.'); return; }
+  try {
+    await sb.auth.updateUser({ password: newPassword });
+    showToast('Password updated ✅');
+  } catch (e) {
+    showToast('Could not update password: ' + (e.message || 'try again'));
+  }
+}
+
+function handleDeleteData() {
+  const confirmed = confirm('This will request deletion of your AfriAce data. This cannot be undone once processed. Continue?');
+  if (!confirmed) return;
+  showToast('Deletion requests go through support for now — a self-serve flow is a follow-up pass.');
+}
+
+function stripHtml(html) {
+  if (!html) return '';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---------- INIT ----------
+window.addEventListener('DOMContentLoaded', () => {
+  bootApp().catch(err => {
+    console.error(err);
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('screen-login').classList.add('active');
+  });
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
